@@ -8,7 +8,7 @@ Formation : Polytech Montpellier - IG5 / DaMS (Semestre 9).
 - Justin Chapon ([@Letju](https://github.com/Letju))
 - Nabil Bennacer ([@nabil-bennacer](https://github.com/nabil-bennacer))
 - Tom Cantillon ([@Tom-Cantillon](https://github.com/Tom-Cantillon))
-- Salmaan Big ([@salmaanbig](https://github.com/salmaanbig))
+- Salma elannaby ([@salmaanbig](https://github.com/salmaanbig))
 - Manuela Zapata Quirós ([@ManuelaZQ](https://github.com/ManuelaZQ))
 
 ## Description

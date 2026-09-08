@@ -30,6 +30,11 @@ Le système s'articule autour de trois briques principales :
 - **Paiement** : Stripe (PaymentIntent & Checkout)
 - **Outils** : Figma (conception UI), GitHub (versioning & CI/CD), Docker, Adminer
 
+## Stratégie de Branches (Git Workflow)
+
+- **`main`** : Branche stable de production / livrable jalons. Tout commit sur `main` doit être validé et fonctionnel.
+- **`dev`** : Branche principale de développement. Toute nouvelle fonctionnalité ou correctif est développé sur une branche dédiée (ex: `feature/nom-tache`) puis mergé dans `dev`.
+
 ## Démarrage Rapide de la Base de Données
 
 Pour lancer la base de données PostgreSQL 16 et l'interface visuelle Adminer avec les données de test préchargées :

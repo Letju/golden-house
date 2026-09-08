@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-golden_secret}
       POSTGRES_DB: ${POSTGRES_DB:-golden_house_db}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5434}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # Initialisation automatique du schéma et des données de test au premier lancement

@@ -24,8 +24,8 @@ ON CONFLICT (id) DO NOTHING;
 -- 3. ADRESSES
 -- -----------------------------------------------------------------------------
 INSERT INTO addresses (id, user_id, type, street, complement, postal_code, city, country, is_default) VALUES
-('ad000001-0000-0000-0000-000000000001', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'LIVRAISON', 'Place Eugène Bataillon', 'Polytech Montpellier - IG5', '34095', 'Montpellier', 'France', TRUE),
-('ad000002-0000-0000-0000-000000000002', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'FACTURATION', '10 Boulevard du Jeu de Paume', 'Appartement 4B', '34000', 'Montpellier', 'France', FALSE)
+('a0000001-0000-0000-0000-000000000001', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'LIVRAISON', 'Place Eugène Bataillon', 'Polytech Montpellier - IG5', '34095', 'Montpellier', 'France', TRUE),
+('a0000002-0000-0000-0000-000000000002', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'FACTURATION', '10 Boulevard du Jeu de Paume', 'Appartement 4B', '34000', 'Montpellier', 'France', FALSE)
 ON CONFLICT (id) DO NOTHING;
 
 -- -----------------------------------------------------------------------------
@@ -33,7 +33,7 @@ ON CONFLICT (id) DO NOTHING;
 -- -----------------------------------------------------------------------------
 INSERT INTO products (id, nom, description, prix, categorie, type_matiere, couleur, largeur_cm, hauteur_cm, profondeur_cm, stock, seuil_alerte, images, fournisseur_id, est_actif) VALUES
 (
-    'p0000001-0000-0000-0000-000000000001',
+    'c0000001-0000-0000-0000-000000000001',
     'Canapé d''Angle Velours Céleste',
     'Canapé d''angle panoramique haut de gamme au revêtement velours royal déperlant. Assise profonde et mousse haute résilience 35kg/m3.',
     1299.00,
@@ -50,7 +50,7 @@ INSERT INTO products (id, nom, description, prix, categorie, type_matiere, coule
     TRUE
 ),
 (
-    'p0000002-0000-0000-0000-000000000002',
+    'c0000002-0000-0000-0000-000000000002',
     'Fauteuil Loveseat Bouclette Cocoon',
     'Banquette loveseat 2 places au design organique enveloppant en tissu texturé bouclette blanche. Idéal pour salons contemporains.',
     649.00,
@@ -67,7 +67,7 @@ INSERT INTO products (id, nom, description, prix, categorie, type_matiere, coule
     TRUE
 ),
 (
-    'p0000003-0000-0000-0000-000000000003',
+    'c0000003-0000-0000-0000-000000000003',
     'Canapé Convertible Express Oslo',
     'Canapé convertible 3 places scandinave avec couchage quotidien 140x190cm mémoire de forme et ouverture express sans retirer les coussins.',
     899.00,
@@ -84,7 +84,7 @@ INSERT INTO products (id, nom, description, prix, categorie, type_matiere, coule
     TRUE
 ),
 (
-    'p0000004-0000-0000-0000-000000000004',
+    'c0000004-0000-0000-0000-000000000004',
     'Canapé Droit Cuir Vintage Chesterfield',
     'Le grand classique Chesterfield en cuir pleine fleur vieilli fait main, capitonnage traditionnel et pieds en bois massif ciré.',
     1790.00,
@@ -101,7 +101,7 @@ INSERT INTO products (id, nom, description, prix, categorie, type_matiere, coule
     TRUE
 ),
 (
-    'p0000005-0000-0000-0000-000000000005',
+    'c0000005-0000-0000-0000-000000000005',
     'Canapé Modulable 4 Modules Cloud',
     'Système de canapé entièrement modulable à assembler selon vos envies. Confort duvet d oie et tissu résistant aux taches.',
     2150.00,
@@ -124,9 +124,9 @@ ON CONFLICT (id) DO NOTHING;
 -- -----------------------------------------------------------------------------
 INSERT INTO reviews (id, user_id, product_id, titre, description, note, reponse_commercant, repondu_at) VALUES
 (
-    'rev00001-0000-0000-0000-000000000001',
+    'e0000001-0000-0000-0000-000000000001',
     'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    'p0000001-0000-0000-0000-000000000001',
+    'c0000001-0000-0000-0000-000000000001',
     'Superbe confort et tissu très doux',
     'Reçu en avance, livraison très professionnelle dans le salon. Le bleu nuit est magnifique sous une lumière naturelle.',
     5,
@@ -140,15 +140,15 @@ ON CONFLICT (id) DO NOTHING;
 -- -----------------------------------------------------------------------------
 INSERT INTO orders (id, order_number, user_id, statut, statut_paiement, stripe_payment_intent_id, stripe_session_id, shipping_address_id, billing_address_id, montant_total, devise, code_promo_applique) VALUES
 (
-    'ord00001-0000-0000-0000-000000000001',
+    'd0000001-0000-0000-0000-000000000001',
     'CMD-2026-0001',
     'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
     'EN_PREPARATION',
     'SUCCEEDED',
     'pi_test_3N9xJkLkd82LsmQ81JkaopLq',
     'cs_test_a1b2c3d4e5f6',
-    'ad000001-0000-0000-0000-000000000001',
-    'ad000002-0000-0000-0000-000000000002',
+    'a0000001-0000-0000-0000-000000000001',
+    'a0000002-0000-0000-0000-000000000002',
     1299.00,
     'EUR',
     NULL
@@ -157,9 +157,9 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO order_items (id, order_id, product_id, nom_produit, quantite, prix_unitaire, total_ligne) VALUES
 (
-    'oi000001-0000-0000-0000-000000000001',
-    'ord00001-0000-0000-0000-000000000001',
-    'p0000001-0000-0000-0000-000000000001',
+    'f0000001-0000-0000-0000-000000000001',
+    'd0000001-0000-0000-0000-000000000001',
+    'c0000001-0000-0000-0000-000000000001',
     'Canapé d''Angle Velours Céleste',
     1,
     1299.00,
@@ -172,7 +172,7 @@ ON CONFLICT (id) DO NOTHING;
 -- -----------------------------------------------------------------------------
 INSERT INTO notifications (id, user_id, titre, message, type, est_lu) VALUES
 (
-    'not00001-0000-0000-0000-000000000001',
+    'f1000001-0000-0000-0000-000000000001',
     'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
     'Commande confirmée !',
     'Votre commande CMD-2026-0001 est en cours de préparation dans nos ateliers.',

@@ -1,0 +1,337 @@
+// Golden House - Prisma Schema
+// Projet IWA (Ingénierie du Web Avancée 2) - Polytech Montpellier (IG5 / DaMS)
+// Schéma de base de données nettoyé et optimisé pour le MVP (M-Commerce Mobilier)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// ENUMS
+// -----------------------------------------------------------------------------
+
+enum Role {
+  CLIENT
+  COMMERCANT
+  ADMIN
+}
+
+enum Currency {
+  EUR
+  USD
+}
+
+enum ProductCategory {
+  CANAPE_DROIT
+  CANAPE_ANGLE
+  CANAPE_CONVERTIBLE
+  FAUTEUIL_LOVESEAT
+  MODULABLE
+  VINTAGE
+}
+
+enum MaterialType {
+  CUIR
+  VELOURS
+  TISSU_BOUCLETTE
+  LIN
+  MICROFIBRE
+  BOIS_MASSIF
+}
+
+enum OrderStatus {
+  EN_ATTENTE_PAIEMENT
+  PAYEE
+  EN_PREPARATION
+  EXPEDIEE
+  LIVREE
+  ANNULEE
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+enum AddressType {
+  LIVRAISON
+  FACTURATION
+  MIXTE
+}
+
+enum SupplyOrderStatus {
+  BROUILLON
+  EMISE
+  CONFIRMEE
+  EXPEDIEE
+  RECEPTIONNEE
+  ANNULEE
+}
+
+enum NotificationType {
+  COMMANDE_STATUT
+  STOCK_BAS
+  PROMOTION
+  SYSTEME
+}
+
+// -----------------------------------------------------------------------------
+// UTILISATEURS & ADRESSES
+// -----------------------------------------------------------------------------
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  passwordHash     String    @map("password_hash")
+  username         String    @unique
+  firstName        String?   @map("first_name")
+  lastName         String?   @map("last_name")
+  phone            String?
+  role             Role      @default(CLIENT)
+  currency         Currency  @default(EUR)
+  stripeCustomerId String?   @unique @map("stripe_customer_id") // ID client Stripe (cus_xxx)
+  isActive         Boolean   @default(true) @map("is_active")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  addresses     Address[]
+  cart          Cart?
+  orders        Order[]
+  reviews       Review[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Address {
+  id           String      @id @default(uuid())
+  userId       String      @map("user_id")
+  type         AddressType @default(LIVRAISON)
+  street       String
+  complement   String?
+  postalCode   String      @map("postal_code")
+  city         String
+  country      String      @default("France")
+  isDefault    Boolean     @default(false) @map("is_default")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingOrders  Order[] @relation("ShippingAddress")
+  billingOrders   Order[] @relation("BillingAddress")
+
+  @@map("addresses")
+}
+
+// -----------------------------------------------------------------------------
+// CATALOGUE PRODUIT (MVP : MOBILIER & CANAPÉS)
+// -----------------------------------------------------------------------------
+
+model Product {
+  id            String          @id @default(uuid())
+  nom           String
+  description   String
+  prix          Decimal         @db.Decimal(10, 2)
+  categorie     ProductCategory
+  matiere       MaterialType    @map("type_matiere")
+  couleur       String
+  largeurCm     Int             @map("largeur_cm")
+  hauteurCm     Int             @map("hauteur_cm")
+  profondeurCm  Int             @map("profondeur_cm")
+  stock         Int             @default(0)
+  seuilAlerte   Int             @default(5) @map("seuil_alerte")
+  images        String[]        @default([])
+  fournisseurId String?         @map("fournisseur_id")
+  estActif      Boolean         @default(true) @map("est_actif")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  fournisseur      Fournisseur?        @relation(fields: [fournisseurId], references: [id], onDelete: SetNull)
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+  reviews          Review[]
+  supplyOrderItems SupplyOrderItem[]
+
+  @@index([categorie])
+  @@index([prix])
+  @@index([couleur])
+  @@map("products")
+}
+
+// -----------------------------------------------------------------------------
+// PANIER D'ACHAT
+// -----------------------------------------------------------------------------
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique @map("user_id")
+  codePromo String?    @map("code_promo")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String   @map("cart_id")
+  productId String   @map("product_id")
+  quantite  Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
+}
+
+// -----------------------------------------------------------------------------
+// COMMANDES & PAIEMENT (INTÉGRATION STRIPE)
+// -----------------------------------------------------------------------------
+
+model Order {
+  id                    String        @id @default(uuid())
+  orderNumber           String        @unique @map("order_number")
+  userId                String        @map("user_id")
+  statut                OrderStatus   @default(EN_ATTENTE_PAIEMENT)
+  statutPaiement        PaymentStatus @default(PENDING) @map("statut_paiement")
+  stripePaymentIntentId String?       @unique @map("stripe_payment_intent_id") // ID PaymentIntent Stripe (pi_xxx)
+  stripeSessionId       String?       @map("stripe_session_id")                // Checkout Session Stripe (cs_xxx)
+  shippingAddressId     String        @map("shipping_address_id")
+  billingAddressId      String        @map("billing_address_id")
+  montantTotal          Decimal       @map("montant_total") @db.Decimal(10, 2)
+  devise                Currency      @default(EUR)
+  codePromoApplique     String?       @map("code_promo_applique")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  user            User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  shippingAddress Address     @relation("ShippingAddress", fields: [shippingAddressId], references: [id], onDelete: Restrict)
+  billingAddress  Address     @relation("BillingAddress", fields: [billingAddressId], references: [id], onDelete: Restrict)
+  items           OrderItem[]
+
+  @@index([userId])
+  @@index([statut])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String   @map("order_id")
+  productId    String   @map("product_id")
+  nomProduit   String   @map("nom_produit")
+  quantite     Int
+  prixUnitaire Decimal  @map("prix_unitaire") @db.Decimal(10, 2)
+  totalLigne   Decimal  @map("total_ligne") @db.Decimal(10, 2)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@map("order_items")
+}
+
+// -----------------------------------------------------------------------------
+// AVIS CLIENTS & MODÉRATION COMMERÇANT
+// -----------------------------------------------------------------------------
+
+model Review {
+  id                String    @id @default(uuid())
+  userId            String    @map("user_id")
+  productId         String    @map("product_id")
+  titre             String
+  description       String
+  note              Int       // Note entre 1 et 5
+  reponseCommercant String?   @map("reponse_commercant")
+  reponduAt         DateTime? @map("repondu_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("reviews")
+}
+
+// -----------------------------------------------------------------------------
+// NOTIFICATIONS IN-APP
+// -----------------------------------------------------------------------------
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  titre     String
+  message   String
+  type      NotificationType @default(SYSTEME)
+  estLu     Boolean          @default(false) @map("est_lu")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, estLu])
+  @@map("notifications")
+}
+
+// -----------------------------------------------------------------------------
+// FOURNISSEURS & RÉAPPROVISIONNEMENTS (BACKOFFICE COMMERÇANT)
+// -----------------------------------------------------------------------------
+
+model Fournisseur {
+  id        String   @id @default(uuid())
+  nom       String
+  email     String
+  telephone String?  @map("telephone")
+  adresse   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  products     Product[]
+  supplyOrders SupplyOrder[]
+
+  @@map("fournisseurs")
+}
+
+model SupplyOrder {
+  id            String            @id @default(uuid())
+  fournisseurId String            @map("fournisseur_id")
+  statut        SupplyOrderStatus @default(BROUILLON)
+  montantTotal  Decimal?          @map("montant_total") @db.Decimal(10, 2)
+  dateEmission  DateTime?         @map("date_emission")
+  dateReception DateTime?         @map("date_reception")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  fournisseur Fournisseur       @relation(fields: [fournisseurId], references: [id], onDelete: Restrict)
+  items       SupplyOrderItem[]
+
+  @@map("supply_orders")
+}
+
+model SupplyOrderItem {
+  id            String   @id @default(uuid())
+  supplyOrderId String   @map("supply_order_id")
+  productId     String   @map("product_id")
+  quantite      Int
+  prixUnitaire  Decimal? @map("prix_unitaire") @db.Decimal(10, 2)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  supplyOrder SupplyOrder @relation(fields: [supplyOrderId], references: [id], onDelete: Cascade)
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@map("supply_order_items")
+}

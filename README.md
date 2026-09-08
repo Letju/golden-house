@@ -3,10 +3,13 @@
 Projet réalisé dans le cadre du module **Ingénierie du Web Avancée 2 (IWA)**.  
 Formation : Polytech Montpellier - IG5 / DaMS (Semestre 9).
 
-## Binôme
+## Équipe
 
-- Justin Chapon (`justin.chapon@etu.umontpellier.fr`)
-- Nabil Bennacer (`bennacerna@gmail.com`)
+- Justin Chapon ([@Letju](https://github.com/Letju))
+- Nabil Bennacer ([@nabil-bennacer](https://github.com/nabil-bennacer))
+- Tom Cantillon ([@Tom-Cantillon](https://github.com/Tom-Cantillon))
+- Salmaan Big ([@salmaanbig](https://github.com/salmaanbig))
+- Manuela Zapata Quirós ([@ManuelaZQ](https://github.com/ManuelaZQ))
 
 ## Description
 

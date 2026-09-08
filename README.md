@@ -34,7 +34,6 @@ Le système s'articule autour de trois briques principales :
 
 - `CONSIGNES.md` : Sujet et exigences transmises par Christophe Nauroy.
 - `CAHIER_DES_CHARGES.md` : Cadrage fonctionnel complet, périmètre MVP, workflows acheteur et commerçant.
-- `docs/MODELE_DONNEES.md` : Modélisation complète de la base de données (MCD/MLD, diagramme Mermaid, explications des relations et intégration Stripe).
 - `docs/` : Documents annexes et notes brutes de cadrage (`Note 7 sept. 2026.pdf`, `Note 8 sept. 2026.pdf`).
 
 ## Structure du Répertoire
@@ -54,7 +53,6 @@ Le système s'articule autour de trois briques principales :
 │   ├── package.json          # Tooling Prisma & scripts
 │   └── .env.example
 └── docs/
-    ├── MODELE_DONNEES.md     # Spécification et diagramme du schéma de données
     ├── Note 7 sept. 2026.pdf # Notes de cadrage initiales
     └── Note 8 sept. 2026.pdf # Schéma manuscrit de Nabil Bennacer
 ```

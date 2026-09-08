@@ -32,19 +32,16 @@ Le système s'articule autour de trois briques principales :
 
 ## Stratégie de Branches (Git Workflow)
 
-- **`main`** : Branche stable de production / livrable jalons. Tout commit sur `main` doit être validé et fonctionnel.
-- **`dev`** : Branche principale de développement. Toute nouvelle fonctionnalité ou correctif est développé sur une branche dédiée (ex: `feature/nom-tache`) puis mergé dans `dev`.
+- **`main`** : Branche de référence pour les spécifications, le cahier des charges et la documentation (.md).
+- **`dev`** : Branche active de développement contenant l'ensemble du code source applicatif (backend, scripts de base de données, Docker, frontend).
 
-## Démarrage Rapide de la Base de Données
-
-Pour lancer la base de données PostgreSQL 16 et l'interface visuelle Adminer avec les données de test préchargées :
-
-```bash
-cd backend
-docker compose up -d
-```
-- **Interface Web Adminer** : [http://localhost:8080](http://localhost:8080)
-- **Visualisation du Schéma (ERD)** : Voir [`backend/database/README.md`](backend/database/README.md) pour le diagramme visuel complet des tables et relations.
+> 💡 **Pour accéder au code et démarrer la base de données :**  
+> Basculez sur la branche `dev` :
+> ```bash
+> git checkout dev
+> cd backend
+> docker compose up -d
+> ```
 
 ## Documents de référence
 
@@ -52,25 +49,16 @@ docker compose up -d
 - `CAHIER_DES_CHARGES.md` : Cadrage fonctionnel complet, périmètre MVP, workflows acheteur et commerçant.
 - `docs/` : Documents annexes et notes brutes de cadrage (`Note 7 sept. 2026.pdf`, `Note 8 sept. 2026.pdf`).
 
-## Structure du Répertoire
+## Structure de la Branche Main
 
 ```text
 .
-├── CAHIER_DES_CHARGES.md
-├── CONSIGNES.md
-├── README.md
+├── CAHIER_DES_CHARGES.md     # Spécifications et cadrage fonctionnel
+├── CONSIGNES.md              # Exigences de Christophe Nauroy
+├── README.md                 # Vue d'ensemble du projet et workflow
 ├── .gitignore
-├── backend/
-│   ├── database/
-│   │   ├── 01-schema.sql     # Script SQL DDL complet (PostgreSQL / Spring Boot)
-│   │   ├── 02-seed.sql       # Jeu d'essai réaliste MVP (canapés, stock, Stripe)
-│   │   └── README.md         # Documentation et diagramme relationnel (ERD) visuel
-│   ├── prisma/
-│   │   └── schema.prisma     # Schéma Prisma déclaratif (visualisation & tooling)
-│   ├── docker-compose.yml    # Conteneurs PostgreSQL 16 + Adminer Web GUI
-│   ├── package.json          # Tooling Prisma & scripts
-│   └── .env.example
-└── docs/
-    ├── Note 7 sept. 2026.pdf # Notes de cadrage initiales
-    └── Note 8 sept. 2026.pdf # Schéma manuscrit de Nabil Bennacer
+└── docs/                     # Notes brutes et documents d'architecture
+    ├── Note 7 sept. 2026.pdf
+    └── Note 8 sept. 2026.pdf
 ```
+

@@ -28,7 +28,18 @@ Le système s'articule autour de trois briques principales :
 - **Base de données** : PostgreSQL
 - **IA & Agents** : Model Context Protocol (MCP)
 - **Paiement** : Stripe (PaymentIntent & Checkout)
-- **Outils** : Figma (conception UI), GitHub (versioning & CI/CD), Prisma Studio / Docker
+- **Outils** : Figma (conception UI), GitHub (versioning & CI/CD), Docker, Adminer
+
+## Démarrage Rapide de la Base de Données
+
+Pour lancer la base de données PostgreSQL 16 et l'interface visuelle Adminer avec les données de test préchargées :
+
+```bash
+cd backend
+docker compose up -d
+```
+- **Interface Web Adminer** : [http://localhost:8080](http://localhost:8080)
+- **Visualisation du Schéma (ERD)** : Voir [`backend/database/README.md`](backend/database/README.md) pour le diagramme visuel complet des tables et relations.
 
 ## Documents de référence
 
@@ -46,10 +57,12 @@ Le système s'articule autour de trois briques principales :
 ├── .gitignore
 ├── backend/
 │   ├── database/
-│   │   └── schema.sql        # Script SQL DDL complet (PostgreSQL / Spring Boot)
+│   │   ├── 01-schema.sql     # Script SQL DDL complet (PostgreSQL / Spring Boot)
+│   │   ├── 02-seed.sql       # Jeu d'essai réaliste MVP (canapés, stock, Stripe)
+│   │   └── README.md         # Documentation et diagramme relationnel (ERD) visuel
 │   ├── prisma/
 │   │   └── schema.prisma     # Schéma Prisma déclaratif (visualisation & tooling)
-│   ├── docker-compose.yml    # Conteneur PostgreSQL 16 local
+│   ├── docker-compose.yml    # Conteneurs PostgreSQL 16 + Adminer Web GUI
 │   ├── package.json          # Tooling Prisma & scripts
 │   └── .env.example
 └── docs/

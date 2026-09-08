@@ -2,7 +2,7 @@
 
 **Projet** : Golden House - Application M-Commerce de mobilier et décoration d'intérieur  
 **Matière** : Ingénierie du Web Avancée 2 (IWA) - Semestre 9 (Polytech Montpellier)  
-**Équipe** : Justin Chapon, Nabil Bennacer, Tom Cantillon, Salmaan Big, Manuela Zapata Quirós  
+**Équipe** : Justin Chapon, Nabil Bennacer, Tom Cantillon, Salma elannaby, Manuela Zapata Quirós  
 **Date de cadrage** : Séance du 7 septembre 2026  
 
 ---

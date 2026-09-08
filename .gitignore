@@ -1,0 +1,25 @@
+# Environnements et dependances
+node_modules/
+.env
+.env.local
+.env.*.local
+
+# Builds et artefacts
+target/
+build/
+dist/
+out/
+*.class
+*.jar
+*.war
+
+# IDE et OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+*.log
+
+# Outils IA internes
+.ai/

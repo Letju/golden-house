@@ -22,10 +22,10 @@ La plateforme se compose :
 ## 2. Périmètre du MVP (Minimum Viable Product)
 
 Pour la première itération exploitable du projet :
-- **Catalogue ciblé** : Vente de canapés.
+- **Catalogue complet** : L'ensemble du catalogue (canapés, lits, rideaux, coussins).
 - **Recherche & Navigation** : Barre de recherche textuelle et système de filtres par critères (prix, couleur, dimensions, matière).
 - **Parcours d'achat complet** : De la consultation publique jusqu'au paiement fictif et confirmation de commande.
-- **Backoffice minimal** : Gestion du stock de canapés et tableau de bord avec les premiers KPI de vente.
+- **Backoffice minimal** : Gestion du stock et tableau de bord avec les premiers KPI de vente.
 
 ---
 

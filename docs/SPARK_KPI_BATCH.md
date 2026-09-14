@@ -8,7 +8,7 @@ pré-calculées, aucun calcul à la volée.
 
 ## 2. Périmètre MVP
 
-Catalogue restreint aux canapés. Exécution en batch (quotidienne ou
+L'ensemble du catalogue (canapés, lits, rideaux, coussins). Exécution en batch (quotidienne ou
 pluri-quotidienne selon la démo). Pas de temps réel.
 
 Hors périmètre : panier, paiement Stripe, suivi de commande en direct.

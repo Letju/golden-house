@@ -27,3 +27,11 @@ Thumbs.db
 # Documents internes
 docs/MODELE_DONNEES.md
 MODELE_DONNEES.md
+
+# LaTeX intermediates
+*.aux
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz

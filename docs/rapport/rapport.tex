@@ -26,9 +26,16 @@
 \definecolor{asyncorange}{RGB}{200, 80, 10}  % Orange asynchrone
 \definecolor{postgreen}{RGB}{20, 125, 60}    % Vert POST
 \definecolor{rowgray}{RGB}{248, 250, 253}    % Gris clair zébrure
-\definecolor{pkcolor}{RGB}{180, 30, 30}      % Rouge PK
-\definecolor{fkcolor}{RGB}{30, 100, 180}     % Bleu FK
+\definecolor{pkcolor}{RGB}{190, 20, 40}      % Rouge PK
+\definecolor{fkcolor}{RGB}{30, 95, 185}      % Bleu FK
+\definecolor{ukcolor}{RGB}{180, 110, 20}     % Doré UK
 \definecolor{hdrcolor}{RGB}{235, 240, 248}   % En-tête tableau
+
+% Couleurs modèle relationnel bd.png
+\definecolor{userblue}{RGB}{25, 95, 215}
+\definecolor{orderpurple}{RGB}{125, 45, 150}
+\definecolor{cataloggreen}{RGB}{20, 130, 70}
+\definecolor{notifteal}{RGB}{12, 115, 120}
 
 % --- Configuration des titres ---
 \titleformat{\section}{\color{primary}\large\bfseries}{\thesection.}{0.5em}{}[\titlerule]
@@ -97,31 +104,31 @@
 ]
 
 % 1. Clients (Y=11.2)
-\node[client] (mobile) at (3.8, 11.2) {\textbf{App Mobile Acheteur}\\\tiny React Native};
-\node[client] (backoffice) at (8.2, 11.2) {\textbf{Backoffice Web}\\\tiny React / TypeScript};
-\node[client] (chatbot) at (14.8, 11.2) {\textbf{Chatbot IA}\\\tiny Assistant client (LLM)};
+\node[client] (mobile) at (3.8, 11.2) {\textbf{App Mobile Acheteur}\\[2pt]{\tiny React Native}};
+\node[client] (backoffice) at (8.2, 11.2) {\textbf{Backoffice Web}\\[2pt]{\tiny React / TypeScript}};
+\node[client] (chatbot) at (14.8, 11.2) {\textbf{Chatbot IA}\\[2pt]{\tiny Assistant client (LLM)}};
 
 % 2. Gateways (Y=9.8)
-\node[gw] (apigw) at (6.0, 9.8) {\textbf{API Gateway} (Spring Cloud Gateway)\\\tiny Routage dynamique, Sécurité JWT \& Rate Limiting};
-\node[gwsmall] (mcpgw) at (14.8, 9.8) {\textbf{MCP Gateway}\\\tiny Model Context Protocol};
+\node[gw] (apigw) at (6.0, 9.8) {\textbf{API Gateway} (Spring Cloud Gateway)\\[2pt]{\tiny Routage dynamique, Sécurité JWT \& Rate Limiting}};
+\node[gwsmall] (mcpgw) at (14.8, 9.8) {\textbf{MCP Gateway}\\[2pt]{\tiny Model Context Protocol}};
 
 % 3. Row 1 : Tunnel d'achat direct (Y=7.4)
-\node[service] (user) at (1.6, 7.4) {\textbf{User Service}\\\tiny Profils, Adresses, Auth};
-\node[service] (order) at (6.0, 7.4) {\textbf{Order Service}\\\tiny Cycle de commande};
-\node[service] (cart) at (10.4, 7.4) {\textbf{Cart Service}\\\tiny Panier \& Totaux};
-\node[service] (catalog) at (14.8, 7.4) {\textbf{Catalog Service}\\\tiny Meubles, Stocks};
+\node[service] (user) at (1.6, 7.4) {\textbf{User Service}\\[2pt]{\tiny Profils, Adresses, Auth}};
+\node[service] (order) at (6.0, 7.4) {\textbf{Order Service}\\[2pt]{\tiny Cycle de commande}};
+\node[service] (cart) at (10.4, 7.4) {\textbf{Cart Service}\\[2pt]{\tiny Panier \& Totaux}};
+\node[service] (catalog) at (14.8, 7.4) {\textbf{Catalog Service}\\[2pt]{\tiny Meubles, Stocks}};
 
 % 4. Row 2 : Facturation, Paiement, Notification, Fournisseurs (Y=4.8)
-\node[billing] (billing) at (1.6, 4.8) {\textbf{Billing Service}\\\tiny Facturation légale PDF};
-\node[service] (payment) at (6.0, 4.8) {\textbf{Payment Service}\\\tiny Sessions Stripe Checkout};
-\node[service] (notif) at (10.4, 4.8) {\textbf{Notification Service}\\\tiny Emails (SMTP) \& Push};
-\node[service] (supplier) at (14.8, 4.8) {\textbf{Supplier Service}\\\tiny Réapprovisionnements};
+\node[billing] (billing) at (1.6, 4.8) {\textbf{Billing Service}\\[2pt]{\tiny Facturation légale PDF}};
+\node[service] (payment) at (6.0, 4.8) {\textbf{Payment Service}\\[2pt]{\tiny Sessions Stripe Checkout}};
+\node[service] (notif) at (10.4, 4.8) {\textbf{Notification Service}\\[2pt]{\tiny Emails (SMTP) \& Push}};
+\node[service] (supplier) at (14.8, 4.8) {\textbf{Supplier Service}\\[2pt]{\tiny Réapprovisionnements}};
 
 % 5. Row 3 : Batches Spark, Tiers Stripe, PostgreSQL, Avis (Y=2.2)
-\node[batch] (batches) at (1.6, 2.2) {\textbf{Batches Spark}\\\tiny KPIs ventes \& Reco ALS};
-\node[ext] (stripe) at (6.0, 2.2) {\textbf{Stripe API}\\\tiny Prestataire bancaire CB};
-\node[db] (postgres) at (10.4, 2.2) {\textbf{PostgreSQL}\\\tiny Schémas dédiés ACID};
-\node[service] (review) at (14.8, 2.2) {\textbf{Review Service}\\\tiny Avis \& Notes produits};
+\node[batch] (batches) at (1.6, 2.2) {\textbf{Batches Spark}\\[2pt]{\tiny KPIs ventes \& Reco ALS}};
+\node[ext] (stripe) at (6.0, 2.2) {\textbf{Stripe API}\\[2pt]{\tiny Prestataire bancaire CB}};
+\node[db] (postgres) at (10.4, 2.2) {\textbf{PostgreSQL}\\[2pt]{\tiny Schémas dédiés ACID}};
+\node[service] (review) at (14.8, 2.2) {\textbf{Review Service}\\[2pt]{\tiny Avis \& Notes produits}};
 
 % Routes Gateways
 \draw[route] (mobile) -- (apigw);
@@ -148,7 +155,7 @@
 \draw[async] (stripe.north west) to[out=135, in=225] node[left, font=\tiny\bfseries] {Webhook} (payment.south west);
 \draw[async] (payment.north west) to[out=120, in=240] node[left, font=\tiny\bfseries] {Paiement OK} (order.south west);
 \draw[async] (payment.west) -- node[above, font=\tiny\bfseries] {OrderPaid} (billing.east);
-\draw[async] (billing.south east) to[out=300, in=240] node[below, font=\tiny\bfseries] {Facture PDF (\texttt{InvoiceGenerated})} (notif.south west);
+\draw[async] (billing.north east) to[out=30, in=150] node[above, sloped, pos=0.2, font=\tiny\bfseries] {Facture PDF} (notif.north west);
 \draw[async] (payment.east) -- node[above, font=\tiny\bfseries] {Achat OK} (notif.west);
 \draw[async] (order.south east) -- node[above, sloped, font=\tiny\bfseries] {Statut cmd} (notif.north west);
 \draw[async] (catalog.south west) -- node[above, sloped, font=\tiny\bfseries] {Seuil stock} (notif.north east);
@@ -230,15 +237,244 @@
 \newpage
 
 % =============================================================================
-% SECTION 4 : SERVICES, APIS & MODÈLES DE DONNÉES (Page 3 : 1/4)
+% SECTION 4 : MODÈLE RELATIONNEL DES DONNÉES (POSTGRESQL) (Page 3)
 % =============================================================================
-\section{Services et données (1/4)}
+\section{Modèle relationnel des données (PostgreSQL)}
+
+\begin{center}
+\begin{tikzpicture}[
+    scale=0.66, every node/.style={transform shape},
+    tbl/.style={draw=black!70, rounded corners=2pt, inner xsep=4pt, inner ysep=1pt, fill=white},
+    fkarrow/.style={->, >=Stealth, thick, color=gray!60!black},
+    lbl/.style={font=\tiny\sffamily\bfseries, fill=white, inner sep=1.2pt, text=gray!50!black, rounded corners=1pt}
+]
+
+% ==================== 1. USERS (Haut Droite) ====================
+\node[tbl] (users) at (22.2, 21.0) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{userblue}\multicolumn{3}{c}{\textbf{\color{white}\small users}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{email} & VARCHAR & \textcolor{ukcolor}{\textbf{UK}} \\
+\textbf{username} & VARCHAR & \textcolor{ukcolor}{\textbf{UK}} \\
+\textbf{password\_hash} & VARCHAR & \\
+\textbf{first\_name} & VARCHAR & \\
+\textbf{last\_name} & VARCHAR & \\
+\textbf{phone} & VARCHAR & \\
+\textbf{role} & role\_enum & \\
+\textbf{currency} & currency\_enum & \\
+\textbf{stripe\_customer\_id} & VARCHAR & \textcolor{ukcolor}{\textbf{UK}} \\
+\textbf{is\_active} & BOOL & \\
+\end{tabular}
+};
+
+% ==================== 2. ADDRESSES (Haut Centre) ====================
+\node[tbl] (addresses) at (14.5, 23.5) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{userblue}\multicolumn{3}{c}{\textbf{\color{white}\small addresses}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{user\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{type} & address\_type & \\
+\textbf{street} & VARCHAR & \\
+\textbf{postal\_code} & VARCHAR & \\
+\textbf{city} & VARCHAR & \\
+\textbf{country} & VARCHAR & \\
+\textbf{is\_default} & BOOL & \\
+\end{tabular}
+};
+
+% ==================== 3. ORDERS (Haut Gauche) ====================
+\node[tbl] (orders) at (2.5, 22.0) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small orders}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{order\_number} & VARCHAR & \textcolor{ukcolor}{\textbf{UK}} \\
+\textbf{user\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{statut} & order\_status\_enum & \\
+\textbf{statut\_paiement} & payment\_enum & \\
+\textbf{stripe\_payment\_intent\_id} & VARCHAR & \textcolor{ukcolor}{\textbf{UK}} \\
+\textbf{shipping\_address\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{billing\_address\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{montant\_total} & NUMERIC & \\
+\textbf{devise} & currency\_enum & \\
+\end{tabular}
+};
+
+% ==================== 4. CARTS (Sous Addresses) ====================
+\node[tbl] (carts) at (14.5, 17.2) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small carts}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{user\_id} & UUID & \textcolor{ukcolor}{\textbf{FK-UQ}} \\
+\textbf{code\_promo} & VARCHAR & \\
+\end{tabular}
+};
+
+% ==================== 5. CART_ITEMS (Gauche de Carts) ====================
+\node[tbl] (cart_items) at (6.5, 16.5) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small cart\_items}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{cart\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{product\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{quantite} & INT & \\
+\end{tabular}
+};
+
+% ==================== 6. ORDER_ITEMS (Sous Orders) ====================
+\node[tbl] (order_items) at (2.5, 12.5) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small order\_items}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{order\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{product\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{nom\_produit} & VARCHAR & \\
+\textbf{quantite} & INT & \\
+\textbf{prix\_unitaire} & NUMERIC & \\
+\textbf{total\_ligne} & NUMERIC & \\
+\end{tabular}
+};
+
+% ==================== 7. NOTIFICATIONS (Sous Carts) ====================
+\node[tbl] (notifications) at (14.5, 12.0) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{notifteal}\multicolumn{3}{c}{\textbf{\color{white}\small notifications}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{user\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{titre} & VARCHAR & \\
+\textbf{type} & notif\_type\_enum & \\
+\textbf{est\_lu} & BOOL & \\
+\end{tabular}
+};
+
+% ==================== 8. REVIEWS (Sous Cart_items) ====================
+\node[tbl] (reviews) at (5.5, 6.8) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{notifteal}\multicolumn{3}{c}{\textbf{\color{white}\small reviews}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{user\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{product\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{titre} & VARCHAR & \\
+\textbf{note} & INT 1-5 & \\
+\textbf{reponse\_commercant} & TEXT & \\
+\end{tabular}
+};
+
+% ==================== 9. PRODUCTS (Centre) ====================
+\node[tbl] (products) at (14.5, 4.0) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{cataloggreen}\multicolumn{3}{c}{\textbf{\color{white}\small products}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{nom} & VARCHAR & \\
+\textbf{prix} & NUMERIC & \\
+\textbf{categorie} & category\_enum & \\
+\textbf{type\_matiere} & material\_enum & \\
+\textbf{couleur} & VARCHAR & \\
+\textbf{largeur/hauteur/prof.} & INT & \\
+\textbf{stock} & INT & \\
+\textbf{seuil\_alerte} & INT & \\
+\textbf{images} & TEXT[] & \\
+\textbf{fournisseur\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{est\_actif} & BOOL & \\
+\end{tabular}
+};
+
+% ==================== 10. FOURNISSEURS (Bas Droite) ====================
+\node[tbl] (fournisseurs) at (22.2, 1.0) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{cataloggreen}\multicolumn{3}{c}{\textbf{\color{white}\small fournisseurs}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{nom} & VARCHAR & \\
+\textbf{email} & VARCHAR & \\
+\textbf{telephone} & VARCHAR & \\
+\textbf{adresse} & TEXT & \\
+\end{tabular}
+};
+
+% ==================== 11. SUPPLY_ORDERS (Bas Centre) ====================
+\node[tbl] (supply_orders) at (14.5, -2.5) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{cataloggreen}\multicolumn{3}{c}{\textbf{\color{white}\small supply\_orders}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{fournisseur\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{statut} & supply\_status\_enum & \\
+\textbf{montant\_total} & NUMERIC & \\
+\textbf{date\_emission} & TIMESTAMPTZ & \\
+\textbf{date\_reception} & TIMESTAMPTZ & \\
+\end{tabular}
+};
+
+% ==================== 12. SUPPLY_ORDER_ITEMS (Bas Gauche) ====================
+\node[tbl] (supply_order_items) at (5.5, -1.0) {
+\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
+\rowcolor{cataloggreen}\multicolumn{3}{c}{\textbf{\color{white}\small supply\_order\_items}} \\
+\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
+\textbf{supply\_order\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{product\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{quantite} & INT & \\
+\textbf{prix\_unitaire} & NUMERIC & \\
+\end{tabular}
+};
+
+% ==================== RELATIONS ====================
+% addresses -> users (horizontal direct de user_id vers users.id)
+\draw[fkarrow] ([yshift=18pt]addresses.east) -- node[lbl, above, pos=0.4] {user\_id} ([yshift=45pt]users.west);
+
+% orders -> users (horizontal sous addresses, au niveau de devise)
+\draw[fkarrow] ([yshift=-45pt]orders.east) -- node[lbl, above, pos=0.4] {user\_id} ([yshift=5pt]users.west);
+
+% orders -> addresses (billing & shipping)
+\draw[fkarrow] ([yshift=8pt]orders.east) -- node[lbl, above, pos=0.45] {billing\_address\_id} ([yshift=8pt]addresses.west);
+\draw[fkarrow] ([yshift=-12pt]orders.east) -- node[lbl, below, pos=0.45] {shipping\_address\_id} ([yshift=-12pt]addresses.west);
+
+% orders -> order_items
+\draw[fkarrow] (orders.south) -- node[lbl, left] {order\_id} (order_items.north);
+
+% carts -> users
+\draw[fkarrow] (carts.east) -- node[lbl, above] {user\_id} (users.west |- carts.east);
+
+% cart_items -> carts (ligne directe de cart_id)
+\draw[fkarrow] ([yshift=10pt]cart_items.east) -- node[lbl, above] {cart\_id} ([yshift=10pt]carts.west);
+
+% notifications -> users
+\draw[fkarrow] (notifications.east) -- node[lbl, above] {user\_id} (users.west |- notifications.east);
+
+% reviews -> users (ligne horizontale sous notifications, passe à users.south)
+\draw[fkarrow] ([yshift=15pt]reviews.east) -- (22.2, 7.5) node[lbl, pos=0.55, above] {user\_id} -- (users.south);
+
+% cart_items -> products (passe sous carts à x=11.0, descend et entre dans products.north)
+\draw[fkarrow] ([yshift=-10pt]cart_items.east) -- node[lbl, above, pos=0.4] {product\_id} (11.0, 15.3) -- (11.0, 7.8) -- ([xshift=-16pt]products.north |- 0, 7.8) -- ([xshift=-16pt]products.north);
+
+% order_items -> products (parallèle)
+\draw[fkarrow] ([yshift=12pt]order_items.east) -- node[lbl, above, pos=0.25] {product\_id} (11.3, 13.0) -- (11.3, 7.8) -- ([xshift=-6pt]products.north |- 0, 7.8) -- ([xshift=-6pt]products.north);
+
+% reviews -> products (horizontal direct de product_id)
+\draw[fkarrow] ([yshift=-6pt]reviews.east) -- node[lbl, above] {product\_id} ([yshift=38pt]products.west);
+
+% supply_order_items -> products (orthogonal de product_id vers products.west)
+\draw[fkarrow] ([yshift=-8pt]supply_order_items.east) -- (10.5, -1.28) -- node[lbl, left, pos=0.5] {product\_id} (10.5, 2.2) -- ([yshift=-50pt]products.west);
+
+% supply_order_items -> supply_orders (horizontal direct de supply_order_id vers supply_orders)
+\draw[fkarrow] ([yshift=10pt]supply_order_items.east) -- node[lbl, above, pos=0.4] {supply\_order\_id} ([yshift=24pt]supply_orders.west);
+
+% products -> fournisseurs (horizontal direct)
+\draw[fkarrow] ([yshift=-22pt]products.east) -- node[lbl, above, pos=0.4] {fournisseur\_id} ([yshift=15pt]fournisseurs.west);
+
+% supply_orders -> fournisseurs (horizontal direct)
+\draw[fkarrow] ([yshift=12pt]supply_orders.east) -- node[lbl, above, pos=0.4] {fournisseur\_id} ([yshift=-15pt]fournisseurs.west);
+
+\end{tikzpicture}
+\end{center}
+
+\newpage
+
+% =============================================================================
+% SECTION 5 : POINTS D'ENTRÉE DES SERVICES (Page 4 : 1/2)
+% =============================================================================
+\section{Points d'entrée des microservices (1/2)}
 
 \subsection{Gateways (API Gateway Spring Cloud \& MCP Gateway)}
 \textit{Point d'entrée unique de l'architecture. Terminaison TLS, routage inverse, validation JWT et interface LLM.}
 
-\vspace{1pt}
-\noindent\textbf{Points d'entrée (APIs REST \& JSON-RPC) :}
 \begin{center}
 \renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
@@ -253,16 +489,11 @@
 \end{tabularx}
 \end{center}
 
-\vspace{1pt}
-\noindent\textbf{Données :} Architecture \textit{Stateless}. Cache mémoire \textbf{Redis} pour le stockage temporaire des sessions révoquées et le rate limiting.
-
-\vspace{5pt}
+\vspace{3pt}
 
 \subsection{User Service}
 \textit{Gestion des profils clients, adresses de livraison/facturation et authentification sécurisée.}
 
-\vspace{1pt}
-\noindent\textbf{Points d'entrée (APIs REST) :}
 \begin{center}
 \renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
@@ -281,37 +512,11 @@
 \end{tabularx}
 \end{center}
 
-\vspace{1pt}
-\noindent\textbf{Modèle PostgreSQL :}
-\begin{center}
-\renewcommand{\arraystretch}{1.08}
-\rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
-\toprule[0.8pt]
-\rowcolor{hdrcolor}
-\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
-\midrule
-\texttt{\textbf{users}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{secondary}{\textbf{UK}} \texttt{email}, \texttt{username}\newline
-\textcolor{secondary}{\textbf{UK}} \texttt{stripe\_customer\_id} & 
-\texttt{password\_hash}, \texttt{first\_name}, \texttt{last\_name}, \texttt{phone}, \texttt{role} (enum), \texttt{currency} (enum), \texttt{is\_active} (BOOL) \\ \hline
-
-\texttt{\textbf{addresses}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users.id} & 
-\texttt{type} (enum), \texttt{street}, \texttt{postal\_code}, \texttt{city}, \texttt{country}, \texttt{is\_default} (BOOL) \\
-\bottomrule[0.8pt]
-\end{tabularx}
-\end{center}
-
-\vspace{5pt}
+\vspace{3pt}
 
 \subsection{Catalog Service}
 \textit{Référentiel des meubles, catégories, matières et gestion des stocks en temps réel.}
 
-\vspace{1pt}
-\noindent\textbf{Points d'entrée (APIs REST) :}
 \begin{center}
 \renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
@@ -328,41 +533,13 @@
 \end{tabularx}
 \end{center}
 
-\vspace{1pt}
-\noindent\textbf{Modèle PostgreSQL :}
-\begin{center}
-\renewcommand{\arraystretch}{1.08}
-\rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
-\toprule[0.8pt]
-\rowcolor{hdrcolor}
-\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
-\midrule
-\texttt{\textbf{products}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{fkcolor}{\textbf{FK}} \texttt{fournisseur\_id} $\to$ \texttt{fournisseurs} & 
-\texttt{nom}, \texttt{prix} (NUMERIC), \texttt{categorie} (enum), \texttt{type\_matiere} (enum), \texttt{couleur}, \texttt{largeur/hauteur/prof.} (INT), \texttt{stock} (INT), \texttt{seuil\_alerte} (INT), \texttt{images} (TEXT[]), \texttt{est\_actif} (BOOL) \\
-\bottomrule[0.8pt]
-\end{tabularx}
-\end{center}
-
-\newpage
-
-% =============================================================================
-% SECTION 4 : SERVICES, APIS & MODÈLES DE DONNÉES (Page 4 : 2/4)
-% =============================================================================
-\setcounter{savedsubsection}{\value{subsection}}
-\addtocounter{section}{-1}
-\section{Services et données (2/4)}
-\setcounter{subsection}{\value{savedsubsection}}
+\vspace{3pt}
 
 \subsection{Cart Service}
 \textit{Gestion des paniers actifs des clients, calcul des totaux et application des codes promotionnels.}
 
-\vspace{2pt}
-\noindent\textbf{Points d'entrée (APIs REST) :}
 \begin{center}
-\renewcommand{\arraystretch}{1.10}
+\renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
 \begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
 \toprule[0.8pt]
@@ -378,39 +555,13 @@
 \end{tabularx}
 \end{center}
 
-\vspace{2pt}
-\noindent\textbf{Modèle PostgreSQL :}
-\begin{center}
-\renewcommand{\arraystretch}{1.10}
-\rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
-\toprule[0.8pt]
-\rowcolor{hdrcolor}
-\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
-\midrule
-\texttt{\textbf{carts}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{secondary}{\textbf{FK-UQ}} \texttt{user\_id} $\to$ \texttt{users.id} & 
-\texttt{code\_promo} (VARCHAR) \\ \hline
-
-\texttt{\textbf{cart\_items}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{fkcolor}{\textbf{FK}} \texttt{cart\_id} $\to$ \texttt{carts.id}\newline
-\textcolor{fkcolor}{\textbf{FK}} \texttt{product\_id} $\to$ \texttt{products.id} & 
-\texttt{quantite} (INT) \\
-\bottomrule[0.8pt]
-\end{tabularx}
-\end{center}
-
-\vspace{8pt}
+\vspace{3pt}
 
 \subsection{Order Service}
 \textit{Gestion du cycle de commande, validation des adresses et orchestration de l'état de livraison.}
 
-\vspace{2pt}
-\noindent\textbf{Points d'entrée (APIs REST) :}
 \begin{center}
-\renewcommand{\arraystretch}{1.10}
+\renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
 \begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
 \toprule[0.8pt]
@@ -425,49 +576,19 @@
 \end{tabularx}
 \end{center}
 
-\vspace{2pt}
-\noindent\textbf{Modèle PostgreSQL :}
-\begin{center}
-\renewcommand{\arraystretch}{1.10}
-\rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
-\toprule[0.8pt]
-\rowcolor{hdrcolor}
-\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
-\midrule
-\texttt{\textbf{orders}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{secondary}{\textbf{UK}} \texttt{order\_number}\newline
-\textcolor{secondary}{\textbf{UK}} \texttt{stripe\_intent\_id}\newline
-\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users.id}\newline
-\textcolor{fkcolor}{\textbf{FK}} \texttt{shipping\_address\_id}\newline
-\textcolor{fkcolor}{\textbf{FK}} \texttt{billing\_address\_id} & 
-\texttt{statut} (enum: CREATED, PAID, SHIPPED, DELIVERED, CANCELLED), \texttt{statut\_paiement} (enum), \texttt{montant\_total} (NUMERIC), \texttt{devise} (enum) \\ \hline
-
-\texttt{\textbf{order\_items}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{fkcolor}{\textbf{FK}} \texttt{order\_id} $\to$ \texttt{orders.id}\newline
-\textcolor{fkcolor}{\textbf{FK}} \texttt{product\_id} $\to$ \texttt{products.id} & 
-\texttt{nom\_produit}, \texttt{quantite} (INT), \texttt{prix\_unitaire} (NUMERIC), \texttt{total\_ligne} (NUMERIC) \\
-\bottomrule[0.8pt]
-\end{tabularx}
-\end{center}
-
 \newpage
 
 % =============================================================================
-% SECTION 4 : SERVICES, APIS & MODÈLES DE DONNÉES (Page 5 : 3/4)
+% SECTION 5 : POINTS D'ENTRÉE DES SERVICES (Page 5 : 2/2)
 % =============================================================================
 \setcounter{savedsubsection}{\value{subsection}}
 \addtocounter{section}{-1}
-\section{Services et données (3/4)}
+\section{Points d'entrée des microservices (2/2)}
 \setcounter{subsection}{\value{savedsubsection}}
 
 \subsection{Payment Service}
 \textit{Passerelle de paiement sécurisée via Stripe API, création de sessions et écoute des webhooks.}
 
-\vspace{1pt}
-\noindent\textbf{Points d'entrée (APIs REST) :}
 \begin{center}
 \renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
@@ -483,31 +604,11 @@
 \end{tabularx}
 \end{center}
 
-\vspace{1pt}
-\noindent\textbf{Modèle PostgreSQL :}
-\begin{center}
-\renewcommand{\arraystretch}{1.08}
-\rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
-\toprule[0.8pt]
-\rowcolor{hdrcolor}
-\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
-\midrule
-\texttt{\textbf{payments}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{secondary}{\textbf{UK}} \texttt{order\_id} $\to$ \texttt{orders.id} & 
-\texttt{stripe\_session\_id}, \texttt{stripe\_payment\_intent\_id}, \texttt{amount} (NUMERIC), \texttt{currency}, \texttt{status} (enum), \texttt{paid\_at} (TIMESTAMPTZ) \\
-\bottomrule[0.8pt]
-\end{tabularx}
-\end{center}
-
-\vspace{5pt}
+\vspace{3pt}
 
 \subsection{Billing Service (Facturation)}
 \textit{Émission asynchrone des factures légales (sur \texttt{OrderPaidEvent}), calcul TVA et archivage PDF (S3/MinIO).}
 
-\vspace{1pt}
-\noindent\textbf{Points d'entrée (APIs REST) :}
 \begin{center}
 \renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
@@ -523,33 +624,11 @@
 \end{tabularx}
 \end{center}
 
-\vspace{1pt}
-\noindent\textbf{Modèle PostgreSQL :}
-\begin{center}
-\renewcommand{\arraystretch}{1.08}
-\rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
-\toprule[0.8pt]
-\rowcolor{hdrcolor}
-\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
-\midrule
-\texttt{\textbf{invoices}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{secondary}{\textbf{UK}} \texttt{numero\_facture}\newline
-\textcolor{secondary}{\textbf{FK-UQ}} \texttt{order\_id} $\to$ \texttt{orders}\newline
-\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users} & 
-\texttt{montant\_ht} (NUMERIC), \texttt{taux\_tva} (NUMERIC), \texttt{montant\_tva} (NUMERIC), \texttt{montant\_ttc} (NUMERIC), \texttt{url\_pdf} (TEXT), \texttt{date\_facturation} (TIMESTAMPTZ) \\
-\bottomrule[0.8pt]
-\end{tabularx}
-\end{center}
-
-\vspace{5pt}
+\vspace{3pt}
 
 \subsection{Notification Service}
 \textit{Consommateur d'événements asynchrones pour l'envoi de messages transactionnels (Email SMTP, Push).}
 
-\vspace{1pt}
-\noindent\textbf{Points d'entrée (APIs REST) :}
 \begin{center}
 \renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
@@ -565,41 +644,13 @@
 \end{tabularx}
 \end{center}
 
-\vspace{1pt}
-\noindent\textbf{Modèle PostgreSQL :}
-\begin{center}
-\renewcommand{\arraystretch}{1.08}
-\rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
-\toprule[0.8pt]
-\rowcolor{hdrcolor}
-\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
-\midrule
-\texttt{\textbf{notifications}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users.id} & 
-\texttt{titre}, \texttt{type} (enum: EMAIL, PUSH, SMS), \texttt{est\_lu} (BOOL) \\
-\bottomrule[0.8pt]
-\end{tabularx}
-\end{center}
-
-\newpage
-
-% =============================================================================
-% SECTION 4 : SERVICES, APIS & MODÈLES DE DONNÉES (Page 6 : 4/4)
-% =============================================================================
-\setcounter{savedsubsection}{\value{subsection}}
-\addtocounter{section}{-1}
-\section{Services et données (4/4)}
-\setcounter{subsection}{\value{savedsubsection}}
+\vspace{3pt}
 
 \subsection{Supplier Service (Fournisseurs \& Réapprovisionnements)}
 \textit{Gestion du catalogue des fabricants partenaires, passation et réception des commandes de réassort.}
 
-\vspace{2pt}
-\noindent\textbf{Points d'entrée (APIs REST) :}
 \begin{center}
-\renewcommand{\arraystretch}{1.10}
+\renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
 \begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
 \toprule[0.8pt]
@@ -613,43 +664,13 @@
 \end{tabularx}
 \end{center}
 
-\vspace{2pt}
-\noindent\textbf{Modèle PostgreSQL :}
-\begin{center}
-\renewcommand{\arraystretch}{1.10}
-\rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
-\toprule[0.8pt]
-\rowcolor{hdrcolor}
-\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
-\midrule
-\texttt{\textbf{fournisseurs}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & --- & 
-\texttt{nom}, \texttt{email}, \texttt{telephone}, \texttt{adresse} (TEXT) \\ \hline
-
-\texttt{\textbf{supply\_orders}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{fkcolor}{\textbf{FK}} \texttt{fournisseur\_id} $\to$ \texttt{fournisseurs} & 
-\texttt{statut} (enum: SENT, RECEIVED, CANCELLED), \texttt{montant\_total}, \texttt{date\_emission}, \texttt{date\_reception} \\ \hline
-
-\texttt{\textbf{supply\_order\_items}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{fkcolor}{\textbf{FK}} \texttt{supply\_order\_id}\newline
-\textcolor{fkcolor}{\textbf{FK}} \texttt{product\_id} & 
-\texttt{quantite} (INT), \texttt{prix\_unitaire} (NUMERIC) \\
-\bottomrule[0.8pt]
-\end{tabularx}
-\end{center}
-
-\vspace{8pt}
+\vspace{3pt}
 
 \subsection{Review Service et Batches Spark}
 \textit{Recueil des avis d'achat et traitements analytiques nocturnes (KPIs, recommandations collaboratives ALS).}
 
-\vspace{2pt}
-\noindent\textbf{Points d'entrée (APIs REST) \& Traitements Batch :}
 \begin{center}
-\renewcommand{\arraystretch}{1.10}
+\renewcommand{\arraystretch}{1.08}
 \rowcolors{2}{rowgray}{white}
 \begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
 \toprule[0.8pt]
@@ -659,33 +680,6 @@
 \textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/reviews} & Dépôt d'un avis client (note de 1 à 5 et commentaire) \\
 \textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/reviews/product/\{id\}} & Consultation des avis et note moyenne d'un meuble \\
 \textcolor{asyncorange}{\textbf{Batch Spark}} & Jobs Spark SQL nocturnes & Agrégation des KPIs journaliers et entraînement modèle ALS \\
-\bottomrule[0.8pt]
-\end{tabularx}
-\end{center}
-
-\vspace{2pt}
-\noindent\textbf{Modèle PostgreSQL :}
-\begin{center}
-\renewcommand{\arraystretch}{1.10}
-\rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
-\toprule[0.8pt]
-\rowcolor{hdrcolor}
-\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
-\midrule
-\texttt{\textbf{reviews}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
-\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users.id}\newline
-\textcolor{fkcolor}{\textbf{FK}} \texttt{product\_id} $\to$ \texttt{products.id} & 
-\texttt{titre}, \texttt{note} (INT 1-5), \texttt{reponse\_commercant} (TEXT) \\ \hline
-
-\texttt{\textbf{recommendations}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{(user\_id, product\_id)} & --- & 
-\texttt{score} (FLOAT, recommandation ALS) \\ \hline
-
-\texttt{\textbf{daily\_kpis}} & 
-\textcolor{pkcolor}{\textbf{PK}} \texttt{date} & --- & 
-\texttt{nb\_commandes} (INT), \texttt{chiffre\_affaires\_ht} (NUMERIC) \\
 \bottomrule[0.8pt]
 \end{tabularx}
 \end{center}

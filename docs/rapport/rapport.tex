@@ -6,7 +6,7 @@
 \usepackage[french]{babel}
 \usepackage{lmodern}
 \usepackage{geometry}
-\geometry{top=1.2cm, bottom=1.3cm, left=1.3cm, right=1.3cm}
+\geometry{top=1.0cm, bottom=1.0cm, left=1.2cm, right=1.2cm}
 \usepackage[table]{xcolor}
 \usepackage{booktabs}
 \usepackage{tabularx}
@@ -15,6 +15,7 @@
 \usepackage{hyperref}
 \usepackage{fancyhdr}
 \usepackage{titlesec}
+\usepackage{lastpage}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows.meta,positioning,fit,backgrounds,calc}
 
@@ -23,12 +24,16 @@
 \definecolor{secondary}{RGB}{185, 120, 30}   % Doré
 \definecolor{syncblue}{RGB}{20, 90, 160}     % Bleu synchrone
 \definecolor{asyncorange}{RGB}{200, 80, 10}  % Orange asynchrone
-\definecolor{rowgray}{RGB}{246, 248, 252}
+\definecolor{postgreen}{RGB}{20, 125, 60}    % Vert POST
+\definecolor{rowgray}{RGB}{248, 250, 253}    % Gris clair zébrure
+\definecolor{pkcolor}{RGB}{180, 30, 30}      % Rouge PK
+\definecolor{fkcolor}{RGB}{30, 100, 180}     % Bleu FK
+\definecolor{hdrcolor}{RGB}{235, 240, 248}   % En-tête tableau
 
 % --- Configuration des titres ---
 \titleformat{\section}{\color{primary}\large\bfseries}{\thesection.}{0.5em}{}[\titlerule]
-\titlespacing*{\section}{0pt}{7pt}{4pt}
-\titleformat{\subsection}{\color{secondary}\normalsize\bfseries}{\thesubsection.}{0.4em}{}
+\titlespacing*{\section}{0pt}{4pt}{3pt}
+\titleformat{\subsection}{\color{primary}\normalsize\bfseries}{\thesubsection}{0.5em}{}
 \titlespacing*{\subsection}{0pt}{4pt}{2pt}
 
 % --- En-têtes et pieds de page ---
@@ -36,11 +41,15 @@
 \fancyhf{}
 \fancyhead[L]{\footnotesize\color{gray}\textbf{Golden House} -- Architecture Microservices}
 \fancyhead[R]{\footnotesize\color{gray}Polytech Montpellier -- IWA 2}
-\fancyfoot[C]{\footnotesize\thepage\ / 4}
+\fancyfoot[C]{\footnotesize\thepage\ / \pageref{LastPage}}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
 
 \hypersetup{colorlinks=true, linkcolor=primary, urlcolor=syncblue}
+\renewcommand{\theHsection}{\thesection.\thepage}
+\renewcommand{\theHsubsection}{\thesubsection.\thepage}
+
+\newcounter{savedsubsection}
 
 \begin{document}
 
@@ -173,23 +182,24 @@
 \section{Synchrone et Asynchrone}
 
 \begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{\color{syncblue}Synchrone (REST / HTTP)} : Requêtes bloquantes exigeant une réponse immédiate pour finaliser l'action courante (lecture catalogue, calcul panier, validation adresse, réservation stock, session Stripe).
-    \item \textbf{\color{asyncorange}Asynchrone (Events / Webhooks)} : Traitements découplés dans le temps et tolérants aux pannes sans bloquer l'acheteur (webhook Stripe, confirmation paiement, génération facture PDF, notifications email/push, réassort fournisseur, recalcul note).
+    \item \textbf{\textcolor{syncblue}{Synchrone (REST / HTTP)}} : Requêtes bloquantes exigeant une réponse immédiate pour finaliser l'action courante (lecture catalogue, calcul panier, validation adresse, réservation stock, session Stripe).
+    \item \textbf{\textcolor{asyncorange}{Asynchrone (Events / Webhooks)}} : Traitements découplés dans le temps et tolérants aux pannes sans bloquer l'acheteur (webhook Stripe, confirmation paiement, génération facture PDF, notifications email/push, réassort fournisseur, recalcul note).
 \end{itemize}
 
 \newpage
 
 % =============================================================================
-% SECTION 3 : MATRICE DES COMMUNICATIONS (Page 2)
+% SECTION 3 : TABLEAU COMPLET DES COMMUNICATIONS (Page 2)
 % =============================================================================
 \section{Communications entre services}
 
 \begin{center}
 \renewcommand{\arraystretch}{1.18}
-\small
 \rowcolors{2}{rowgray}{white}
-\begin{tabularx}{\textwidth}{@{} l l c p{4.0cm} X @{}}
+\noindent
+\begin{tabularx}{\textwidth}{@{} l l c p{3.6cm} X @{}}
 \toprule[1.2pt]
+\rowcolor{hdrcolor}
 \textbf{Source} & \textbf{Cible} & \textbf{Type} & \textbf{Protocole / Événement} & \textbf{Description} \\
 \midrule[0.8pt]
 \textbf{Clients (Mobile/Web)} & API Gateway & \textcolor{syncblue}{\textbf{Sync}} & HTTP/2 / REST & Point d'entrée unique, terminaison TLS, validation JWT. \\ \hline
@@ -220,173 +230,464 @@
 \newpage
 
 % =============================================================================
-% SECTION 4 : POINTS D'ENTRÉE & MODÈLES DE DONNÉES (Pages 3 et 4)
+% SECTION 4 : SERVICES, APIS & MODÈLES DE DONNÉES (Page 3 : 1/4)
 % =============================================================================
-\section{Points d'entrée et données (1/2)}
+\section{Services et données (1/4)}
 
-\subsection{Gateways}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Points d'entrée} :
-    \begin{itemize}[nosep]
-        \item \texttt{ANY /api/v1/**} : Routage dynamique vers microservices, terminaison TLS, validation token JWT.
-        \item \texttt{POST /mcp/v1/query} : Requête contextuelle Chatbot IA (Model Context Protocol).
-    \end{itemize}
-    \item \textbf{Données} : \textit{Stateless}. Cache Redis pour la révocation des tokens JWT et le rate limiting.
-\end{itemize}
+\subsection{Gateways (API Gateway Spring Cloud \& MCP Gateway)}
+\textit{Point d'entrée unique de l'architecture. Terminaison TLS, routage inverse, validation JWT et interface LLM.}
 
-\vspace{2pt}
+\vspace{1pt}
+\noindent\textbf{Points d'entrée (APIs REST \& JSON-RPC) :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode} & \textbf{Route / Point d'accès} & \textbf{Rôle \& Description} \\
+\midrule
+\texttt{\textbf{ANY}}  & \texttt{/api/v1/**} & Routage inverse vers les microservices selon l'URI, validation du JWT \\
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/mcp/v1/query} & Requête du Chatbot IA (Model Context Protocol), routage vers les outils \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{1pt}
+\noindent\textbf{Données :} Architecture \textit{Stateless}. Cache mémoire \textbf{Redis} pour le stockage temporaire des sessions révoquées et le rate limiting.
+
+\vspace{5pt}
+
 \subsection{User Service}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Points d'entrée} :
-    \begin{itemize}[nosep]
-        \item \texttt{POST /api/users/register} : Inscription nouvel utilisateur.
-        \item \texttt{POST /api/users/login} : Authentification et génération du token JWT.
-        \item \texttt{GET | PUT /api/users/\{id\}} : Consultation et mise à jour du profil utilisateur.
-        \item \texttt{GET | POST /api/users/\{id\}/addresses} : Gestion des adresses de facturation et de livraison.
-    \end{itemize}
-    \item \textbf{Modèle PostgreSQL} :
-    \begin{itemize}[nosep]
-        \item \texttt{\textbf{users}} : \texttt{id} (UUID, PK), \texttt{email} (VARCHAR, UK), \texttt{username} (VARCHAR, UK), \texttt{password\_hash}, \texttt{first\_name}, \texttt{last\_name}, \texttt{phone}, \texttt{role} (role\_enum), \texttt{currency} (currency\_enum), \texttt{stripe\_customer\_id} (UK), \texttt{is\_active} (BOOL).
-        \item \texttt{\textbf{addresses}} : \texttt{id} (UUID, PK), \texttt{user\_id} (UUID, FK users), \texttt{type} (address\_type), \texttt{street}, \texttt{postal\_code}, \texttt{city}, \texttt{country}, \texttt{is\_default} (BOOL).
-    \end{itemize}
-\end{itemize}
+\textit{Gestion des profils clients, adresses de livraison/facturation et authentification sécurisée.}
 
-\vspace{2pt}
+\vspace{1pt}
+\noindent\textbf{Points d'entrée (APIs REST) :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode} & \textbf{Route / Point d'accès} & \textbf{Rôle \& Description} \\
+\midrule
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/users/register} & Création d'un nouveau compte client (hachage Argon2/BCrypt) \\
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/users/login} & Authentification et délivrance du token JWT \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/users/\{id\}} & Consultation du profil utilisateur \\
+\textcolor{secondary}{\texttt{\textbf{PUT}}}  & \texttt{/api/users/\{id\}} & Mise à jour des coordonnées et préférences \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/users/\{id\}/addresses} & Récupération du carnet d'adresses client \\
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/users/\{id\}/addresses} & Ajout d'une adresse de livraison ou de facturation \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{1pt}
+\noindent\textbf{Modèle PostgreSQL :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
+\midrule
+\texttt{\textbf{users}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{secondary}{\textbf{UK}} \texttt{email}, \texttt{username}\newline
+\textcolor{secondary}{\textbf{UK}} \texttt{stripe\_customer\_id} & 
+\texttt{password\_hash}, \texttt{first\_name}, \texttt{last\_name}, \texttt{phone}, \texttt{role} (enum), \texttt{currency} (enum), \texttt{is\_active} (BOOL) \\ \hline
+
+\texttt{\textbf{addresses}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users.id} & 
+\texttt{type} (enum), \texttt{street}, \texttt{postal\_code}, \texttt{city}, \texttt{country}, \texttt{is\_default} (BOOL) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{5pt}
+
 \subsection{Catalog Service}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Points d'entrée} :
-    \begin{itemize}[nosep]
-        \item \texttt{GET /api/products} : Liste paginée des meubles avec filtres (catégorie, matière, couleur, prix).
-        \item \texttt{GET /api/products/\{id\}} : Fiche détaillée d'un meuble (dimensions, stock disponible).
-        \item \texttt{POST /api/products} : Création / mise à jour produit (réservé Backoffice).
-        \item \texttt{POST /api/products/reserve} : Réservation atomique de quantité lors de la commande.
-    \end{itemize}
-    \item \textbf{Modèle PostgreSQL} :
-    \begin{itemize}[nosep]
-        \item \texttt{\textbf{products}} : \texttt{id} (UUID, PK), \texttt{nom} (VARCHAR), \texttt{prix} (NUMERIC), \texttt{categorie} (category\_enum), \texttt{type\_matiere} (material\_enum), \texttt{couleur} (VARCHAR), \texttt{largeur/hauteur/prof.} (INT), \texttt{stock} (INT), \texttt{seuil\_alerte} (INT), \texttt{images} (TEXT[]), \texttt{fournisseur\_id} (UUID, FK), \texttt{est\_actif} (BOOL).
-    \end{itemize}
-\end{itemize}
+\textit{Référentiel des meubles, catégories, matières et gestion des stocks en temps réel.}
 
-\vspace{2pt}
-\subsection{Cart Service}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Points d'entrée} :
-    \begin{itemize}[nosep]
-        \item \texttt{GET /api/cart/\{userId\}} : Récupération du panier actif et calcul des sous-totaux.
-        \item \texttt{POST /api/cart/items} : Ajout d'un article dans le panier.
-        \item \texttt{PUT /api/cart/items/\{id\}} : Modification de quantité d'un article.
-        \item \texttt{DELETE /api/cart/items/\{id\}} : Suppression d'un article ; \texttt{DELETE /api/cart/\{id\}} : Vidage du panier.
-    \end{itemize}
-    \item \textbf{Modèle PostgreSQL} :
-    \begin{itemize}[nosep]
-        \item \texttt{\textbf{carts}} : \texttt{id} (UUID, PK), \texttt{user\_id} (UUID, FK-UQ users), \texttt{code\_promo} (VARCHAR).
-        \item \texttt{\textbf{cart\_items}} : \texttt{id} (UUID, PK), \texttt{cart\_id} (UUID, FK carts), \texttt{product\_id} (UUID, FK products), \texttt{quantite} (INT).
-    \end{itemize}
-\end{itemize}
+\vspace{1pt}
+\noindent\textbf{Points d'entrée (APIs REST) :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode} & \textbf{Route / Point d'accès} & \textbf{Rôle \& Description} \\
+\midrule
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/products} & Recherche et consultation du catalogue filtré \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/products/\{id\}} & Fiche détaillée d'un meuble et niveau de stock disponible \\
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/products} & Création ou modification d'une référence (Backoffice) \\
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/products/reserve} & Réservation atomique du stock avant confirmation commande \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
 
-\vspace{2pt}
-\subsection{Order Service}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Points d'entrée} :
-    \begin{itemize}[nosep]
-        \item \texttt{POST /api/orders} : Création de commande depuis le panier, validation adresse et réservation stock.
-        \item \texttt{GET /api/orders/\{id\}} : Détail d'une commande (lignes, montants, adresses, statuts).
-        \item \texttt{GET /api/orders/user/\{userId\}} : Historique complet des commandes de l'acheteur.
-        \item \texttt{PUT /api/orders/\{id\}/status} : Mise à jour du statut (\texttt{PENDING}, \texttt{PAID}, \texttt{SHIPPED}, \texttt{DELIVERED}).
-    \end{itemize}
-    \item \textbf{Modèle PostgreSQL} :
-    \begin{itemize}[nosep]
-        \item \texttt{\textbf{orders}} : \texttt{id} (UUID, PK), \texttt{order\_number} (VARCHAR, UK), \texttt{user\_id} (UUID, FK), \texttt{statut} (order\_status\_enum), \texttt{statut\_paiement} (payment\_enum), \texttt{stripe\_payment\_intent\_id} (VARCHAR, UK), \texttt{shipping\_address\_id} (UUID, FK), \texttt{billing\_address\_id} (UUID, FK), \texttt{montant\_total} (NUMERIC), \texttt{devise} (currency\_enum).
-        \item \texttt{\textbf{order\_items}} : \texttt{id} (UUID, PK), \texttt{order\_id} (UUID, FK orders), \texttt{product\_id} (UUID, FK products), \texttt{nom\_produit} (VARCHAR), \texttt{quantite} (INT), \texttt{prix\_unitaire} (NUMERIC), \texttt{total\_ligne} (NUMERIC).
-    \end{itemize}
-\end{itemize}
+\vspace{1pt}
+\noindent\textbf{Modèle PostgreSQL :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
+\midrule
+\texttt{\textbf{products}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{fkcolor}{\textbf{FK}} \texttt{fournisseur\_id} $\to$ \texttt{fournisseurs} & 
+\texttt{nom}, \texttt{prix} (NUMERIC), \texttt{categorie} (enum), \texttt{type\_matiere} (enum), \texttt{couleur}, \texttt{largeur/hauteur/prof.} (INT), \texttt{stock} (INT), \texttt{seuil\_alerte} (INT), \texttt{images} (TEXT[]), \texttt{est\_actif} (BOOL) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
 
 \newpage
 
 % =============================================================================
-% SECTION 5 : POINTS D'ENTRÉE & MODÈLES DE DONNÉES (Page 4)
+% SECTION 4 : SERVICES, APIS & MODÈLES DE DONNÉES (Page 4 : 2/4)
 % =============================================================================
-\section{Points d'entrée et données (2/2)}
+\setcounter{savedsubsection}{\value{subsection}}
+\addtocounter{section}{-1}
+\section{Services et données (2/4)}
+\setcounter{subsection}{\value{savedsubsection}}
+
+\subsection{Cart Service}
+\textit{Gestion des paniers actifs des clients, calcul des totaux et application des codes promotionnels.}
+
+\vspace{2pt}
+\noindent\textbf{Points d'entrée (APIs REST) :}
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode} & \textbf{Route / Point d'accès} & \textbf{Rôle \& Description} \\
+\midrule
+\textcolor{syncblue}{\texttt{\textbf{GET}}}    & \texttt{/api/cart/\{userId\}} & Récupération du panier en cours avec totaux calculés \\
+\textcolor{postgreen}{\texttt{\textbf{POST}}}   & \texttt{/api/cart/items} & Ajout d'un meuble au panier (avec contrôle de stock) \\
+\textcolor{secondary}{\texttt{\textbf{PUT}}}    & \texttt{/api/cart/items/\{id\}} & Modification de la quantité d'un article \\
+\textcolor{pkcolor}{\texttt{\textbf{DELETE}}} & \texttt{/api/cart/items/\{id\}} & Suppression d'une ligne d'article \\
+\textcolor{pkcolor}{\texttt{\textbf{DELETE}}} & \texttt{/api/cart/\{id\}} & Vidage ou suppression complète du panier \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{2pt}
+\noindent\textbf{Modèle PostgreSQL :}
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
+\midrule
+\texttt{\textbf{carts}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{secondary}{\textbf{FK-UQ}} \texttt{user\_id} $\to$ \texttt{users.id} & 
+\texttt{code\_promo} (VARCHAR) \\ \hline
+
+\texttt{\textbf{cart\_items}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{fkcolor}{\textbf{FK}} \texttt{cart\_id} $\to$ \texttt{carts.id}\newline
+\textcolor{fkcolor}{\textbf{FK}} \texttt{product\_id} $\to$ \texttt{products.id} & 
+\texttt{quantite} (INT) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{8pt}
+
+\subsection{Order Service}
+\textit{Gestion du cycle de commande, validation des adresses et orchestration de l'état de livraison.}
+
+\vspace{2pt}
+\noindent\textbf{Points d'entrée (APIs REST) :}
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode} & \textbf{Route / Point d'accès} & \textbf{Rôle \& Description} \\
+\midrule
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/orders} & Création de la commande depuis le snapshot panier figé \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/orders/\{id\}} & Consultation du détail et statut d'une commande \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/orders/user/\{userId\}} & Historique complet des commandes d'un client \\
+\textcolor{secondary}{\texttt{\textbf{PUT}}}  & \texttt{/api/orders/\{id\}/status} & Mise à jour du statut d'acheminement (Backoffice) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{2pt}
+\noindent\textbf{Modèle PostgreSQL :}
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
+\midrule
+\texttt{\textbf{orders}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{secondary}{\textbf{UK}} \texttt{order\_number}\newline
+\textcolor{secondary}{\textbf{UK}} \texttt{stripe\_intent\_id}\newline
+\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users.id}\newline
+\textcolor{fkcolor}{\textbf{FK}} \texttt{shipping\_address\_id}\newline
+\textcolor{fkcolor}{\textbf{FK}} \texttt{billing\_address\_id} & 
+\texttt{statut} (enum: CREATED, PAID, SHIPPED, DELIVERED, CANCELLED), \texttt{statut\_paiement} (enum), \texttt{montant\_total} (NUMERIC), \texttt{devise} (enum) \\ \hline
+
+\texttt{\textbf{order\_items}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{fkcolor}{\textbf{FK}} \texttt{order\_id} $\to$ \texttt{orders.id}\newline
+\textcolor{fkcolor}{\textbf{FK}} \texttt{product\_id} $\to$ \texttt{products.id} & 
+\texttt{nom\_produit}, \texttt{quantite} (INT), \texttt{prix\_unitaire} (NUMERIC), \texttt{total\_ligne} (NUMERIC) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\newpage
+
+% =============================================================================
+% SECTION 4 : SERVICES, APIS & MODÈLES DE DONNÉES (Page 5 : 3/4)
+% =============================================================================
+\setcounter{savedsubsection}{\value{subsection}}
+\addtocounter{section}{-1}
+\section{Services et données (3/4)}
+\setcounter{subsection}{\value{savedsubsection}}
 
 \subsection{Payment Service}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Points d'entrée} :
-    \begin{itemize}[nosep]
-        \item \texttt{POST /api/payments/init} : Création de la session Stripe Checkout et renvoi de l'URL de paiement.
-        \item \texttt{POST /api/payments/webhook} : Réception asynchrone des événements de paiement Stripe.
-        \item \texttt{GET /api/payments/order/\{orderId\}} : Consultation de l'état de la transaction financière.
-    \end{itemize}
-    \item \textbf{Modèle PostgreSQL} :
-    \begin{itemize}[nosep]
-        \item \texttt{\textbf{payments}} : \texttt{id} (UUID, PK), \texttt{order\_id} (UUID, UK), \texttt{stripe\_session\_id}, \texttt{stripe\_payment\_intent\_id}, \texttt{amount} (NUMERIC), \texttt{currency}, \texttt{status} (payment\_enum), \texttt{paid\_at} (TIMESTAMPTZ).
-    \end{itemize}
-\end{itemize}
+\textit{Passerelle de paiement sécurisée via Stripe API, création de sessions et écoute des webhooks.}
 
-\vspace{2pt}
-\subsection{Billing Service}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Rôle} : Consommateur asynchrone de l'événement \texttt{OrderPaidEvent}. Attribue un numéro fiscal chronologique unique, calcule la ventilation HT / TVA / TTC, et compile le document légal PDF stocké sur S3 / MinIO.
-    \item \textbf{Points d'entrée} :
-    \begin{itemize}[nosep]
-        \item \texttt{GET /api/invoices/order/\{orderId\}} : Récupération des métadonnées et URL du PDF de facture.
-        \item \texttt{GET /api/invoices/\{id\}/pdf} : Téléchargement direct du document PDF certifié.
-        \item \texttt{GET /api/invoices/user/\{userId\}} : Liste des factures de l'acheteur pour consultation comptable.
-    \end{itemize}
-    \item \textbf{Modèle PostgreSQL} :
-    \begin{itemize}[nosep]
-        \item \texttt{\textbf{invoices}} : \texttt{id} (UUID, PK), \texttt{numero\_facture} (VARCHAR, UK, ex: \texttt{FACT-2026-0001}), \texttt{order\_id} (UUID, FK-UQ orders), \texttt{user\_id} (UUID, FK users), \texttt{montant\_ht} (NUMERIC), \texttt{taux\_tva} (NUMERIC), \texttt{montant\_tva} (NUMERIC), \texttt{montant\_ttc} (NUMERIC), \texttt{url\_pdf} (VARCHAR), \texttt{date\_facturation} (TIMESTAMPTZ).
-    \end{itemize}
-\end{itemize}
+\vspace{1pt}
+\noindent\textbf{Points d'entrée (APIs REST) :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode} & \textbf{Route / Point d'accès} & \textbf{Rôle \& Description} \\
+\midrule
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/payments/init} & Initialisation de session Stripe Checkout \\
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/payments/webhook} & Traitement asynchrone des webhooks Stripe signés \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/payments/order/\{id\}} & Consultation de l'état d'encaissement d'une commande \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
 
-\vspace{2pt}
+\vspace{1pt}
+\noindent\textbf{Modèle PostgreSQL :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
+\midrule
+\texttt{\textbf{payments}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{secondary}{\textbf{UK}} \texttt{order\_id} $\to$ \texttt{orders.id} & 
+\texttt{stripe\_session\_id}, \texttt{stripe\_payment\_intent\_id}, \texttt{amount} (NUMERIC), \texttt{currency}, \texttt{status} (enum), \texttt{paid\_at} (TIMESTAMPTZ) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{5pt}
+
+\subsection{Billing Service (Facturation)}
+\textit{Émission asynchrone des factures légales (sur \texttt{OrderPaidEvent}), calcul TVA et archivage PDF (S3/MinIO).}
+
+\vspace{1pt}
+\noindent\textbf{Points d'entrée (APIs REST) :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode} & \textbf{Route / Point d'accès} & \textbf{Rôle \& Description} \\
+\midrule
+\textcolor{syncblue}{\texttt{\textbf{GET}}} & \texttt{/api/invoices/order/\{id\}} & Récupération des données de facturation d'une commande \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}} & \texttt{/api/invoices/\{id\}/pdf} & Téléchargement du document PDF officiel de facture \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}} & \texttt{/api/invoices/user/\{id\}} & Historique comptable complet d'un utilisateur \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{1pt}
+\noindent\textbf{Modèle PostgreSQL :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
+\midrule
+\texttt{\textbf{invoices}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{secondary}{\textbf{UK}} \texttt{numero\_facture}\newline
+\textcolor{secondary}{\textbf{FK-UQ}} \texttt{order\_id} $\to$ \texttt{orders}\newline
+\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users} & 
+\texttt{montant\_ht} (NUMERIC), \texttt{taux\_tva} (NUMERIC), \texttt{montant\_tva} (NUMERIC), \texttt{montant\_ttc} (NUMERIC), \texttt{url\_pdf} (TEXT), \texttt{date\_facturation} (TIMESTAMPTZ) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{5pt}
+
 \subsection{Notification Service}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Points d'entrée} :
-    \begin{itemize}[nosep]
-        \item \texttt{POST /api/notifications/send} : Envoi direct déclenché par les services internes.
-        \item \texttt{GET /api/notifications/user/\{userId\}} : Centre de notifications in-app pour l'application mobile.
-        \item \texttt{PUT /api/notifications/\{id\}/read} : Marquage de lecture d'une notification.
-    \end{itemize}
-    \item \textbf{Modèle PostgreSQL} :
-    \begin{itemize}[nosep]
-        \item \texttt{\textbf{notifications}} : \texttt{id} (UUID, PK), \texttt{user\_id} (UUID, FK users), \texttt{titre} (VARCHAR), \texttt{type} (notif\_type\_enum : EMAIL, PUSH), \texttt{est\_lu} (BOOL).
-    \end{itemize}
-\end{itemize}
+\textit{Consommateur d'événements asynchrones pour l'envoi de messages transactionnels (Email SMTP, Push).}
+
+\vspace{1pt}
+\noindent\textbf{Points d'entrée (APIs REST) :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode} & \textbf{Route / Point d'accès} & \textbf{Rôle \& Description} \\
+\midrule
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/notifications/send} & Déclenchement d'une notification directe ou de test \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/notifications/user/\{id\}} & Consultation de l'historique des alertes client \\
+\textcolor{secondary}{\texttt{\textbf{PUT}}}  & \texttt{/api/notifications/\{id\}/read} & Marquage d'une notification comme lue \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{1pt}
+\noindent\textbf{Modèle PostgreSQL :}
+\begin{center}
+\renewcommand{\arraystretch}{1.08}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
+\midrule
+\texttt{\textbf{notifications}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users.id} & 
+\texttt{titre}, \texttt{type} (enum: EMAIL, PUSH, SMS), \texttt{est\_lu} (BOOL) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\newpage
+
+% =============================================================================
+% SECTION 4 : SERVICES, APIS & MODÈLES DE DONNÉES (Page 6 : 4/4)
+% =============================================================================
+\setcounter{savedsubsection}{\value{subsection}}
+\addtocounter{section}{-1}
+\section{Services et données (4/4)}
+\setcounter{subsection}{\value{savedsubsection}}
+
+\subsection{Supplier Service (Fournisseurs \& Réapprovisionnements)}
+\textit{Gestion du catalogue des fabricants partenaires, passation et réception des commandes de réassort.}
 
 \vspace{2pt}
-\subsection{Supplier Service}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Points d'entrée} :
-    \begin{itemize}[nosep]
-        \item \texttt{GET /api/suppliers} : Annuaire des fabricants partenaires et coordonnées.
-        \item \texttt{POST /api/suppliers/orders} : Émission d'un ordre d'achat automatique ou manuel suite à alerte stock.
-        \item \texttt{PUT /api/suppliers/orders/\{id\}/receive} : Réception de livraison et déclenchement d'incrément de stock.
-    \end{itemize}
-    \item \textbf{Modèle PostgreSQL} :
-    \begin{itemize}[nosep]
-        \item \texttt{\textbf{fournisseurs}} : \texttt{id} (UUID, PK), \texttt{nom} (VARCHAR), \texttt{email} (VARCHAR), \texttt{telephone} (VARCHAR), \texttt{adresse} (TEXT).
-        \item \texttt{\textbf{supply\_orders}} : \texttt{id} (UUID, PK), \texttt{fournisseur\_id} (UUID, FK), \texttt{statut} (supply\_status\_enum), \texttt{montant\_total} (NUMERIC), \texttt{date\_emission} (TIMESTAMPTZ), \texttt{date\_reception} (TIMESTAMPTZ).
-        \item \texttt{\textbf{supply\_order\_items}} : \texttt{id} (UUID, PK), \texttt{supply\_order\_id} (UUID, FK), \texttt{product\_id} (UUID, FK), \texttt{quantite} (INT), \texttt{prix\_unitaire} (NUMERIC).
-    \end{itemize}
-\end{itemize}
+\noindent\textbf{Points d'entrée (APIs REST) :}
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode} & \textbf{Route / Point d'accès} & \textbf{Rôle \& Description} \\
+\midrule
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/suppliers} & Répertoire des fabricants et adresses partenaires \\
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/suppliers/orders} & Émission d'un bon de commande de réapprovisionnement \\
+\textcolor{secondary}{\texttt{\textbf{PUT}}}  & \texttt{/api/suppliers/orders/\{id\}/receive} & Validation de la réception physique et mise à jour stock \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
 
 \vspace{2pt}
+\noindent\textbf{Modèle PostgreSQL :}
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
+\midrule
+\texttt{\textbf{fournisseurs}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & --- & 
+\texttt{nom}, \texttt{email}, \texttt{telephone}, \texttt{adresse} (TEXT) \\ \hline
+
+\texttt{\textbf{supply\_orders}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{fkcolor}{\textbf{FK}} \texttt{fournisseur\_id} $\to$ \texttt{fournisseurs} & 
+\texttt{statut} (enum: SENT, RECEIVED, CANCELLED), \texttt{montant\_total}, \texttt{date\_emission}, \texttt{date\_reception} \\ \hline
+
+\texttt{\textbf{supply\_order\_items}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{fkcolor}{\textbf{FK}} \texttt{supply\_order\_id}\newline
+\textcolor{fkcolor}{\textbf{FK}} \texttt{product\_id} & 
+\texttt{quantite} (INT), \texttt{prix\_unitaire} (NUMERIC) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{8pt}
+
 \subsection{Review Service et Batches Spark}
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{Review Service (Avis)} :
-    \begin{itemize}[nosep]
-        \item \textbf{Points d'entrée} : \texttt{POST /api/reviews} (dépôt avis vérifié), \texttt{GET /api/reviews/product/\{id\}} (avis du produit).
-        \item \textbf{Modèle PostgreSQL (\texttt{reviews})} : \texttt{id} (UUID, PK), \texttt{user\_id} (UUID, FK), \texttt{product\_id} (UUID, FK), \texttt{titre} (VARCHAR), \texttt{note} (INT 1-5), \texttt{reponse\_commercant} (TEXT).
-    \end{itemize}
-    \item \textbf{Batches Spark (Analytique \& Recommandation)} :
-    \begin{itemize}[nosep]
-        \item \textbf{Traitements} : Traitements Spark SQL distribués de nuit (chiffre d'affaires, panier moyen, volumes par catégorie) et entraînement du modèle de recommandation collaborative ALS (Alternating Least Squares).
-        \item \textbf{Modèle PostgreSQL} :
-        \begin{itemize}[nosep]
-            \item \texttt{\textbf{product\_recommendations}} : \texttt{user\_id}, \texttt{product\_id}, \texttt{score} (FLOAT).
-            \item \texttt{\textbf{kpis\_ventes\_journalieres}} : \texttt{date}, \texttt{nb\_commandes}, \texttt{chiffre\_affaires\_ht}.
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
+\textit{Recueil des avis d'achat et traitements analytiques nocturnes (KPIs, recommandations collaboratives ALS).}
+
+\vspace{2pt}
+\noindent\textbf{Points d'entrée (APIs REST) \& Traitements Batch :}
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} l p{6.8cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Méthode / Type} & \textbf{Route / Job} & \textbf{Rôle \& Description} \\
+\midrule
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/reviews} & Dépôt d'un avis client (note de 1 à 5 et commentaire) \\
+\textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/reviews/product/\{id\}} & Consultation des avis et note moyenne d'un meuble \\
+\textcolor{asyncorange}{\textbf{Batch Spark}} & Jobs Spark SQL nocturnes & Agrégation des KPIs journaliers et entraînement modèle ALS \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
+
+\vspace{2pt}
+\noindent\textbf{Modèle PostgreSQL :}
+\begin{center}
+\renewcommand{\arraystretch}{1.10}
+\rowcolors{2}{rowgray}{white}
+\begin{tabularx}{\textwidth}{@{} p{3.2cm} p{2.6cm} p{4.0cm} >{\raggedright\arraybackslash}X @{}}
+\toprule[0.8pt]
+\rowcolor{hdrcolor}
+\textbf{Table} & \textbf{Clé primaire (PK)} & \textbf{Relations (FK / UK)} & \textbf{Colonnes \& Types} \\
+\midrule
+\texttt{\textbf{reviews}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{id} (UUID) & 
+\textcolor{fkcolor}{\textbf{FK}} \texttt{user\_id} $\to$ \texttt{users.id}\newline
+\textcolor{fkcolor}{\textbf{FK}} \texttt{product\_id} $\to$ \texttt{products.id} & 
+\texttt{titre}, \texttt{note} (INT 1-5), \texttt{reponse\_commercant} (TEXT) \\ \hline
+
+\texttt{\textbf{recommendations}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{(user\_id, product\_id)} & --- & 
+\texttt{score} (FLOAT, recommandation ALS) \\ \hline
+
+\texttt{\textbf{daily\_kpis}} & 
+\textcolor{pkcolor}{\textbf{PK}} \texttt{date} & --- & 
+\texttt{nb\_commandes} (INT), \texttt{chiffre\_affaires\_ht} (NUMERIC) \\
+\bottomrule[0.8pt]
+\end{tabularx}
+\end{center}
 
 \end{document}

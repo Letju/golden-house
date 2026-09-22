@@ -1,0 +1,561 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Paquets essentiels ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=2.2cm, top=2.5cm, bottom=2.5cm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{xltabular}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{amsmath,amssymb}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{pdflscape}
+\usepackage{microtype}
+
+% --- Palette de couleurs moderne ---
+\definecolor{primary}{RGB}{31, 58, 82}      % Bleu marine sombre
+\definecolor{secondary}{RGB}{185, 120, 30}  % Doré Golden House
+\definecolor{accent}{RGB}{41, 128, 185}     % Bleu vif
+\definecolor{lightbg}{RGB}{248, 249, 250}   % Gris clair
+\definecolor{syncgreen}{RGB}{28, 140, 70}   % Vert synchrone
+\definecolor{asyncorange}{RGB}{200, 75, 0}  % Orange asynchrone
+\definecolor{darkgray}{RGB}{50, 50, 50}
+
+% --- Configuration hyperref ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    citecolor=accent,
+    urlcolor=accent,
+    pdftitle={Rapport d'Architecture Microservices - Golden House},
+    pdfauthor={Justin Chapon, Nabil Bennacer, Tom Cantillon, Salma El Annaby, Manuela Zapata Quirós},
+    pdfsubject={Architecture logicielle microservices, interactions synchrones/asynchrones et modèles de données},
+    pdfkeywords={Microservices, Spring Boot, PostgreSQL, Stripe, MCP, Synchrone, Asynchrone, Golden House}
+}
+
+% --- En-têtes et pieds de page ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{darkgray}\textbf{Golden House} -- Architecture Microservices}
+\fancyhead[R]{\small\color{darkgray}Polytech Montpellier -- IWA 2 (S9)}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% --- Style des titres ---
+\titleformat{\section}
+  {\color{primary}\Large\bfseries}
+  {\thesection.}{0.8em}{}[\titlerule]
+\titleformat{\subsection}
+  {\color{primary}\large\bfseries}
+  {\thesubsection.}{0.6em}{}
+\titleformat{\subsubsection}
+  {\color{secondary}\normalsize\bfseries}
+  {\thesubsubsection.}{0.5em}{}
+
+% --- Boîtes thématiques ---
+\newtcolorbox{rulebox}[1][]{
+    colback=lightbg,
+    colframe=secondary,
+    fonttitle=\bfseries\color{white},
+    coltitle=white,
+    colbacktitle=secondary,
+    title=Règle d'or d'urbanisation : Synchrone vs Asynchrone,
+    arc=2mm,
+    boxrule=1pt,
+    #1
+}
+
+\newtcolorbox{servicecard}[2][]{
+    colback=white,
+    colframe=primary,
+    fonttitle=\bfseries\color{white},
+    coltitle=white,
+    colbacktitle=primary,
+    title={#2},
+    arc=2mm,
+    boxrule=1pt,
+    left=3mm, right=3mm, top=2mm, bottom=2mm,
+    #1
+}
+
+\begin{document}
+
+% =============================================================================
+% PAGE DE TITRE
+% =============================================================================
+\begin{titlepage}
+    \pagenumbering{gobble}
+    \centering
+    \vspace*{1.2cm}
+    
+    {\Huge\bfseries\color{primary} GOLDEN HOUSE}\\[0.4cm]
+    {\large\bfseries\color{secondary} Solution M-Commerce de Mobilier \& Décoration d'Intérieur}\\[1.6cm]
+    
+    \rule{\linewidth}{1.2pt}\\[0.4cm]
+    {\LARGE\bfseries\color{primary} RAPPORT D'ARCHITECTURE MICROSERVICES}\\[0.3cm]
+    {\large Découpage des Composants, Matrice des Communications \& Modèles de Données}\\[0.4cm]
+    \rule{\linewidth}{1.2pt}\\[2cm]
+    
+    \begin{minipage}{0.48\textwidth}
+        \textbf{\color{primary}Équipe Projet :}\\[0.2cm]
+        Justin \textsc{Chapon}\\
+        Nabil \textsc{Bennacer}\\
+        Tom \textsc{Cantillon}\\
+        Salma \textsc{El Annaby}\\
+        Manuela \textsc{Zapata Quirós}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \raggedleft
+        \textbf{\color{primary}Cadre Pédagogique :}\\[0.2cm]
+        Module : \textbf{IWA 2} (Web Avancé)\\
+        Enseignant : Christophe \textsc{Nauroy}\\
+        Polytech Montpellier -- IG5 / DaMS\\
+        Semestre 9 -- Année 2026-2027
+    \end{minipage}
+    
+    \vfill
+    
+    \begin{tcolorbox}[colback=lightbg, colframe=primary, arc=2mm, boxrule=1pt, width=\linewidth]
+        \centering\small
+        \textbf{Objet du livrable :} Spécification formelle de l'architecture distribuée Spring Boot pour Golden House. Ce document synthétise le découpage en microservices, justifie la nature synchrone ou asynchrone de chaque flux, intègre formellement la composante de \textbf{Facturation}, et documente pour chaque service ses points d'entrée (APIs REST) et son schéma de données PostgreSQL.
+    \end{tcolorbox}
+    
+    \vspace{0.8cm}
+    {\large\color{darkgray} Septembre 2026}
+\end{titlepage}
+
+% =============================================================================
+% SOMMAIRE
+% =============================================================================
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% =============================================================================
+% SECTION 1 : VUE D'ENSEMBLE ET DÉCOUPAGE DES MICROSERVICES
+% =============================================================================
+\section{Découpage de l'Architecture Microservices}
+\enlargethispage{3\baselineskip}
+
+\subsection{Contexte et Approche d'Urbanisation}
+La solution m-commerce \textbf{Golden House} assure la vente directe d'articles de mobilier et de décoration (canapés, lits, rideaux, coussins). Afin d'offrir une expérience utilisateur fluide sur mobile, une gestion réactive pour les commerçants et une haute tolérance aux pannes, le backend adopte une \textbf{architecture orientée microservices} articulée autour du framework \textbf{Spring Boot} et d'une base relationnelle \textbf{PostgreSQL}.
+
+L'architecture globale se structure en 5 couches fonctionnelles :
+\begin{enumerate}[leftmargin=*, topsep=1pt, itemsep=1pt, parsep=0pt]
+    \item \textbf{Interfaces Utilisateurs (Frontends) :}
+    \begin{itemize}[topsep=0pt, itemsep=0pt, parsep=0pt]
+        \item \textbf{App Mobile Acheteur (React Native) :} Navigation, panier, paiement sécurisé, suivi de commande et avis.
+        \item \textbf{Backoffice Web Commerçant (React) :} Dashboard KPI, gestion du stock, commandes fournisseurs et modération.
+        \item \textbf{Chatbot IA :} Assistant conversationnel client s'appuyant sur des agents et le protocole standardisé MCP.
+    \end{itemize}
+
+    \item \textbf{Passerelles d'Accès (Gateways) :}
+    \begin{itemize}[topsep=0pt, itemsep=0pt, parsep=0pt]
+        \item \textbf{API Gateway (Spring Cloud Gateway) :} Point d'entrée unique, routage dynamique et validation des jetons JWT.
+        \item \textbf{MCP Gateway (Model Context Protocol) :} Passerelle dédiée aux agents IA pour requêter le catalogue et les métriques.
+    \end{itemize}
+
+    \item \textbf{Microservices Métier (Spring Boot) :}
+    Neuf services autonomes et hautement cohésifs :
+    \begin{itemize}[topsep=0pt, itemsep=0pt, parsep=0pt]
+        \item \textbf{User Service} : Comptes, profils, adresses et authentification JWT.
+        \item \textbf{Catalog Service} : Produits, filtres de recherche, stocks et seuils d'alerte.
+        \item \textbf{Cart Service} : Panier temporaire d'achat, calculs de totaux et codes de promotion.
+        \item \textbf{Order Service} : Enregistrement, cycle de vie et suivi des commandes.
+        \item \textbf{Payment Service} : Passerelle Stripe (PaymentIntent, sessions et webhooks).
+        \item \textbf{Billing Service (Facturation)} : Pièces comptables légales immuables et factures PDF.
+        \item \textbf{Notification Service} : Alertes stock bas et notifications d'état par push/email.
+        \item \textbf{Review Service} : Notes et avis clients, réponses du commerçant.
+        \item \textbf{Supplier Service} : Fournisseurs, commandes d'achat et réceptions de stock.
+    \end{itemize}
+
+    \item \textbf{Traitements Batch Analytiques \& IA (Spark) :}
+    \begin{itemize}[topsep=0pt, itemsep=0pt, parsep=0pt]
+        \item \textbf{KPI Batch (Spark Java)} : Calcul différé des métriques (CA global/produit, produit star, rupture).
+        \item \textbf{Recommendation Batch (Spark MLlib -- ALS)} : Filtrage collaboratif calculant les similarités produits.
+    \end{itemize}
+
+    \item \textbf{Persistance \& Services Tiers :}
+    \begin{itemize}[topsep=0pt, itemsep=0pt, parsep=0pt]
+        \item \textbf{PostgreSQL} : Pivot relationnel assurant l'intégrité transactionnelle ACID des ventes.
+        \item \textbf{Stripe API} : Passerelle bancaire externe pour l'exécution conforme et sécurisée des paiements.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Intégration du Service de Facturation (Billing Service)}
+L'analyse des dépendances du système a permis d'isoler la \textbf{Facturation} au sein d'un microservice dédié (\textit{Billing Service}) :
+\begin{itemize}[leftmargin=*, topsep=1pt, itemsep=1pt, parsep=0pt]
+    \item \textbf{Exigence légale \& fiscale :} Une facture est une pièce comptable immuable, possédant une numérotation séquentielle stricte et ventilant les taux de TVA. Elle ne doit pas être altérée si la commande évolue ultérieurement.
+    \item \textbf{Isolation des traitements lourds :} La compilation des fichiers PDF et leur archivage dans un stockage persistant constituent des opérations lourdes qui ne doivent jamais dégrader le temps de réponse du checkout.
+    \item \textbf{Découplage asynchrone :} Le \textit{Billing Service} écoute l'événement de validation bancaire, génère la pièce comptable en tâche de fond et déclenche son expédition par le \textit{Notification Service}.
+\end{itemize}
+
+\clearpage
+
+% =============================================================================
+% SOUS-SECTION 1.3 : FIGURE D'ARCHITECTURE EN PAGE PAYSAGE
+% =============================================================================
+\begin{landscape}
+\subsection{Cartographie Globale des Microservices et Flux}
+\vspace{0.4cm}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.96\linewidth]{figures/golden_arch.png}
+    \caption{Architecture globale des microservices de Golden House (Flux d'accès, passerelles et dépendances inter-services)}
+    \label{fig:architecture}
+\end{figure}
+
+\vspace{0.2cm}
+\noindent\small\textbf{Légende des communications :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Trait plein noir :} Routage des requêtes HTTP externes par l'API Gateway ou requêtes d'outils par le serveur MCP Gateway.
+    \item \textbf{Trait pointillé or/marron :} Appels directs inter-services (dépendances métier détaillées à la section~\ref{sec:comms}).
+    \item \textbf{Accès direct DB (flèches vers PostgreSQL) :} Persistance relationnelle propre à chaque domaine métier.
+\end{itemize}
+\end{landscape}
+
+% =============================================================================
+% SECTION 2 : SYNCHRONE VS ASYNCHRONE
+% =============================================================================
+\label{sec:comms}
+\section{Matrice des Communications : Synchrone vs Asynchrone}
+
+\subsection{Critère d'Urbanisation et Règle de Décision}
+Pour chaque interaction inter-services, le choix du mode de transport repose sur une règle claire :
+
+\begin{rulebox}
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item \textbf{Mode Synchrone (HTTP / REST) :} L'appelant a besoin de la réponse \textbf{immédiatement} pour continuer son exécution, prendre une décision bloquante ou répondre sans délai à l'utilisateur. Toute indisponibilité du service appelé empêche l'opération de se conclure.
+    \item \textbf{Mode Asynchrone (Events / Message Broker / Webhooks) :} L'appelant peut libérer l'utilisateur \textbf{sans attendre} l'achèvement de l'action. La propagation de l'effet en tâche de fond (quelques centaines de millisecondes ou secondes) préserve la cohérence métier à terme (\textit{eventual consistency}) et isole les pannes.
+\end{itemize}
+\end{rulebox}
+
+\subsection{Matrice Exhaustive des Flux Inter-Services}
+
+\small
+\begin{xltabular}{\textwidth}{>{\ttfamily\small}p{4.2cm} p{2.8cm} >{\centering\arraybackslash}p{2.3cm} X}
+\toprule
+\textbf{Flux (\'Emetteur $\rightarrow$ Cible)} & \textbf{Nature de l'échange} & \textbf{Mode} & \textbf{Justification Technique} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Flux (\'Emetteur $\rightarrow$ Cible)} & \textbf{Nature de l'échange} & \textbf{Mode} & \textbf{Justification Technique} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+Cart $\rightarrow$ Catalog & Vérification prix et stock & \textcolor{syncgreen}{\textbf{Synchrone}} & L'acheteur clique sur « Ajouter au panier ». Le Cart Service doit savoir instantanément si le produit existe et si le stock est suffisant. \\
+\addlinespace[0.15cm]
+Order $\rightarrow$ Cart & Récupération du panier & \textcolor{syncgreen}{\textbf{Synchrone}} & Au checkout, la commande a impérativement besoin du contenu exact du panier pour créer l'ordre d'achat. \\
+\addlinespace[0.15cm]
+Order $\rightarrow$ Catalog & Décrémentation du stock & \textcolor{syncgreen}{\textbf{Synchrone}} & Prévention absolue de la survente (\textit{overselling}) en cas d'achats simultanés sur la dernière pièce d'un meuble. \\
+\addlinespace[0.15cm]
+Order $\rightarrow$ User & Validation de l'adresse & \textcolor{syncgreen}{\textbf{Synchrone}} & Contrôle de sécurité immédiat : s'assurer que l'adresse de livraison appartient bien à l'utilisateur connecté. \\
+\addlinespace[0.15cm]
+Order $\rightarrow$ Payment & Initialisation session paiement & \textcolor{syncgreen}{\textbf{Synchrone}} & Order a besoin de l'identifiant de session Stripe (ou PaymentIntent) en retour immédiat pour rediriger le client. \\
+\addlinespace[0.15cm]
+Stripe $\rightarrow$ Payment & Webhook confirmation & \textcolor{asyncorange}{\textbf{Asynchrone}} & Événement externe envoyé par Stripe après validation de la carte bancaire. Personne n'attend en direct sur la ligne. \\
+\addlinespace[0.15cm]
+Payment $\rightarrow$ Order & Confirmation paiement & \textcolor{asyncorange}{\textbf{Asynchrone}} & Mise à jour résiliente du statut de la commande (\texttt{PAYEE}). Si Order est en maintenance, l'événement est rejoué sans perte. \\
+\addlinespace[0.15cm]
+Payment $\rightarrow$ Billing & Déclenchement facturation & \textcolor{asyncorange}{\textbf{Asynchrone}} & Dès paiement validé, la création de la facture légale et du PDF est effectuée en tâche de fond. \\
+\addlinespace[0.15cm]
+Payment $\rightarrow$ Notification & Confirmation de commande & \textcolor{asyncorange}{\textbf{Asynchrone}} & L'envoi du mail de confirmation est non bloquant. Une défaillance de notification ne doit pas annuler la vente. \\
+\addlinespace[0.15cm]
+Billing $\rightarrow$ Notification & Transmission facture & \textcolor{asyncorange}{\textbf{Asynchrone}} & Notification avec pièce jointe ou lien de téléchargement envoyée dès que le PDF est compilé. \\
+\addlinespace[0.15cm]
+Order $\rightarrow$ Notification & Changement de statut & \textcolor{asyncorange}{\textbf{Asynchrone}} & Les alertes de suivi (préparation, expédition) sont notifiées au client sans impacter les outils logistiques. \\
+\addlinespace[0.15cm]
+Catalog $\rightarrow$ Notification & Alerte stock bas & \textcolor{asyncorange}{\textbf{Asynchrone}} & Si le stock passe sous le seuil d'alerte, notification envoyée au commerçant sans ralentir les consultations web. \\
+\addlinespace[0.15cm]
+Catalog $\rightarrow$ Supplier & Déclenchement réappro & \textcolor{asyncorange}{\textbf{Asynchrone}} & Le réapprovisionnement fournisseur s'inscrit sur un délai de plusieurs jours : découplage complet par message. \\
+\addlinespace[0.15cm]
+Supplier $\rightarrow$ Catalog & MAJ stock à réception & \textcolor{asyncorange}{\textbf{Asynchrone}} & Lors de la réception physique des colis, le stock est réincrémenté en tâche de fond dans le catalogue. \\
+\addlinespace[0.15cm]
+Review $\rightarrow$ Catalog & Vérification produit & \textcolor{syncgreen}{\textbf{Synchrone}} & Vérifie que l'article existe avant d'accepter le commentaire, évitant tout avis orphelin. \\
+\addlinespace[0.15cm]
+Review $\rightarrow$ Catalog & Mise à jour note moyenne & \textcolor{asyncorange}{\textbf{Asynchrone}} & Propagation différée de la note moyenne recalculée en cache sur la fiche produit pour préserver la vitesse de lecture. \\
+\addlinespace[0.15cm]
+Batches $\rightarrow$ PostgreSQL & Calculs analytiques & \textcolor{asyncorange}{\textbf{Asynchrone}} & Jobs Spark exécutés sur ordonnanceur planifié (cron) indépendamment des requêtes web. \\
+\end{xltabular}
+\normalsize
+
+\newpage
+
+% =============================================================================
+% SECTION 3 : POINTS D'ENTRÉE ET MODÈLES DE DONNÉES PAR MICROSERVICE
+% =============================================================================
+\section{Points d'Entrée et Modèles de Données par Microservice}
+
+Cette section formalise pour chaque composant sa responsabilité, ses points d'entrée (endpoints d'API REST et événements) ainsi que les tables PostgreSQL associées.
+
+% -----------------------------------------------------------------------------
+\subsection{User Service}
+\textbf{Responsabilité :} Gestion des comptes utilisateurs, émission et validation des jetons JWT, gestion des rôles (Client, Commerçant, Admin), devises (€/\$) et carnet d'adresses.
+
+\vspace{0.2cm}
+\begin{servicecard}{User Service -- Spécification Technique}
+\textbf{Points d'Entrée (APIs REST) :}
+\begin{itemize}[noitemsep]
+    \item \texttt{POST /api/v1/auth/register} : Inscription client (body: email, password, username, phone).
+    \item \texttt{POST /api/v1/auth/login} : Authentification et émission du token JWT.
+    \item \texttt{GET /api/v1/users/me} : Consultation du profil connecté.
+    \item \texttt{PUT /api/v1/users/me} : Modification des informations personnelles et de la devise.
+    \item \texttt{GET /api/v1/users/me/addresses} : Récupération du carnet d'adresses.
+    \item \texttt{POST /api/v1/users/me/addresses} : Ajout d'une adresse de livraison ou facturation.
+    \item \texttt{DELETE /api/v1/users/me/addresses/\{id\}} : Suppression d'une adresse.
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Table \texttt{users}} : \texttt{id} (UUID, PK), \texttt{email} (VARCHAR, UNIQUE), \texttt{password\_hash} (VARCHAR), \texttt{username} (VARCHAR, UNIQUE), \texttt{first\_name} (VARCHAR), \texttt{last\_name} (VARCHAR), \texttt{phone} (VARCHAR), \texttt{role} (ENUM: \texttt{'CLIENT'}, \texttt{'COMMERCANT'}, \texttt{'ADMIN'}), \texttt{currency} (ENUM: \texttt{'EUR'}, \texttt{'USD'}), \texttt{stripe\_customer\_id} (VARCHAR, UNIQUE), \texttt{is\_active} (BOOLEAN), \texttt{created\_at} (TIMESTAMP).
+    \item \textbf{Table \texttt{addresses}} : \texttt{id} (UUID, PK), \texttt{user\_id} (UUID, FK $\rightarrow$ \texttt{users}), \texttt{type} (ENUM: \texttt{'LIVRAISON'}, \texttt{'FACTURATION'}, \texttt{'MIXTE'}), \texttt{street} (VARCHAR), \texttt{complement} (VARCHAR), \texttt{postal\_code} (VARCHAR), \texttt{city} (VARCHAR), \texttt{country} (VARCHAR), \texttt{is\_default} (BOOLEAN).
+\end{itemize}
+\end{servicecard}
+
+% -----------------------------------------------------------------------------
+\subsection{Catalog Service}
+\textbf{Responsabilité :} Gestion du catalogue d'ameublement, moteur de recherche et filtres par critères techniques, gestion des stocks en temps réel et détection du seuil d'alerte.
+
+\vspace{0.2cm}
+\begin{servicecard}{Catalog Service -- Spécification Technique}
+\textbf{Points d'Entrée (APIs REST \& Événements) :}
+\begin{itemize}[noitemsep]
+    \item \texttt{GET /api/v1/products} : Recherche filtrée (catégorie, matière, couleur, prix min/max, stock).
+    \item \texttt{GET /api/v1/products/\{id\}} : Fiche article détaillée avec photos et dimensions.
+    \item \texttt{POST /api/v1/products} : Création d'un produit (réservé rôle ADMIN/COMMERCANT).
+    \item \texttt{PUT /api/v1/products/\{id\}} : Mise à jour des caractéristiques techniques et prix.
+    \item \texttt{PATCH /api/v1/products/\{id\}/stock} : Ajustement ou décrémentation atomique du stock.
+    \item \textbf{Événement consommé :} \texttt{SupplyReceivedEvent} (incrémentation de stock depuis Supplier Service).
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Table \texttt{products}} : \texttt{id} (UUID, PK), \texttt{nom} (VARCHAR), \texttt{description} (TEXT), \texttt{prix} (NUMERIC(10,2)), \texttt{categorie} (ENUM: \texttt{CANAPE\_DROIT}, \texttt{CANAPE\_ANGLE}, \texttt{CANAPE\_CONVERTIBLE}, \texttt{FAUTEUIL\_LOVESEAT}, \texttt{MODULABLE}, \texttt{VINTAGE}), \texttt{type\_matiere} (ENUM: \texttt{CUIR}, \texttt{VELOURS}, \texttt{TISSU\_BOUCLETTE}, \texttt{LIN}, \texttt{MICROFIBRE}, \texttt{BOIS\_MASSIF}), \texttt{couleur} (VARCHAR), \texttt{largeur\_cm}, \texttt{hauteur\_cm}, \texttt{profondeur\_cm} (INT), \texttt{stock} (INT), \texttt{seuil\_alerte} (INT), \texttt{images} (TEXT[]), \texttt{fournisseur\_id} (UUID, FK $\rightarrow$ \texttt{fournisseurs}), \texttt{est\_actif} (BOOLEAN).
+\end{itemize}
+\end{servicecard}
+
+% -----------------------------------------------------------------------------
+\subsection{Cart Service}
+\textbf{Responsabilité :} Gestion des paniers clients, calcul des montants cumulés, application de coupons promotionnels et maintien du panier actif avant passage de commande.
+
+\vspace{0.2cm}
+\begin{servicecard}{Cart Service -- Spécification Technique}
+\textbf{Points d'Entrée (APIs REST) :}
+\begin{itemize}[noitemsep]
+    \item \texttt{GET /api/v1/carts/me} : Consultation du panier de l'utilisateur connecté.
+    \item \texttt{POST /api/v1/carts/me/items} : Ajout d'une ligne d'article (product\_id, quantite).
+    \item \texttt{PATCH /api/v1/carts/me/items/\{itemId\}} : Modification de la quantité choisie.
+    \item \texttt{DELETE /api/v1/carts/me/items/\{itemId\}} : Suppression d'un article du panier.
+    \item \texttt{POST /api/v1/carts/me/promo} : Saisie d'un code de réduction promotionnel.
+    \item \texttt{DELETE /api/v1/carts/me} : Réinitialisation du panier après passage de commande.
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Table \texttt{carts}} : \texttt{id} (UUID, PK), \texttt{user\_id} (UUID, UNIQUE, FK $\rightarrow$ \texttt{users}), \texttt{code\_promo} (VARCHAR), \texttt{updated\_at} (TIMESTAMP).
+    \item \textbf{Table \texttt{cart\_items}} : \texttt{id} (UUID, PK), \texttt{cart\_id} (UUID, FK $\rightarrow$ \texttt{carts}), \texttt{product\_id} (UUID, FK $\rightarrow$ \texttt{products}), \texttt{quantite} (INT, CHECK $>0$), contrainte d'unicité \texttt{(cart\_id, product\_id)}.
+\end{itemize}
+\end{servicecard}
+
+% -----------------------------------------------------------------------------
+\subsection{Order Service}
+\textbf{Responsabilité :} Création de la commande, figeage du prix des articles au moment de l'achat, transitions de statuts (en attente, payée, en préparation, expédiée, livrée) et historique client.
+
+\vspace{0.2cm}
+\begin{servicecard}{Order Service -- Spécification Technique}
+\textbf{Points d'Entrée (APIs REST \& Événements) :}
+\begin{itemize}[noitemsep]
+    \item \texttt{POST /api/v1/orders} : Création d'une commande à partir du panier courant.
+    \item \texttt{GET /api/v1/orders/\{id\}} : Détails complets d'une commande spécifique.
+    \item \texttt{GET /api/v1/orders/my-orders} : Liste de l'historique d'achats du client.
+    \item \texttt{PATCH /api/v1/orders/\{id\}/status} : Mise à jour du statut logistique par le commerçant.
+    \item \textbf{Événement consommé :} \texttt{PaymentConfirmedEvent} (transition de statut vers \texttt{PAYEE}).
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Table \texttt{orders}} : \texttt{id} (UUID, PK), \texttt{order\_number} (VARCHAR, UNIQUE), \texttt{user\_id} (UUID, FK $\rightarrow$ \texttt{users}), \texttt{statut} (ENUM: \texttt{'EN\_ATTENTE\_PAIEMENT'}, \texttt{'PAYEE'}, \texttt{'EN\_PREPARATION'}, \texttt{'EXPEDIEE'}, \texttt{'LIVREE'}, \texttt{'ANNULEE'}), \texttt{statut\_paiement} (ENUM: \texttt{'PENDING'}, \texttt{'SUCCEEDED'}, \texttt{'FAILED'}, \texttt{'REFUNDED'}), \texttt{shipping\_address\_id} (UUID, FK $\rightarrow$ \texttt{addresses}), \texttt{billing\_address\_id} (UUID, FK $\rightarrow$ \texttt{addresses}), \texttt{montant\_total} (NUMERIC(10,2)), \texttt{devise} (ENUM: \texttt{'EUR'}, \texttt{'USD'}), \texttt{code\_promo\_applique} (VARCHAR), \texttt{created\_at} (TIMESTAMP).
+    \item \textbf{Table \texttt{order\_items}} : \texttt{id} (UUID, PK), \texttt{order\_id} (UUID, FK $\rightarrow$ \texttt{orders}), \texttt{product\_id} (UUID, FK $\rightarrow$ \texttt{products}), \texttt{nom\_produit} (VARCHAR), \texttt{quantite} (INT), \texttt{prix\_unitaire} (NUMERIC(10,2)), \texttt{total\_ligne} (NUMERIC(10,2)).
+\end{itemize}
+\end{servicecard}
+
+% -----------------------------------------------------------------------------
+\subsection{Payment Service}
+\textbf{Responsabilité :} Communication avec l'API Stripe, création des sessions sécurisées Checkout / PaymentIntent, vérification des signatures et gestion des webhooks de paiement.
+
+\vspace{0.2cm}
+\begin{servicecard}{Payment Service -- Spécification Technique}
+\textbf{Points d'Entrée (APIs REST \& Webhooks) :}
+\begin{itemize}[noitemsep]
+    \item \texttt{POST /api/v1/payments/create-session} : Initialisation d'une session de paiement Stripe.
+    \item \texttt{POST /api/v1/payments/webhook} : Réception des événements Stripe (\texttt{payment\_intent.succeeded}).
+    \item \texttt{GET /api/v1/payments/status/\{orderId\}} : Consultation du statut de la transaction.
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé :}
+\begin{itemize}[noitemsep]
+    \item Champs Stripe rattachés à la commande : \texttt{stripe\_payment\_intent\_id} (VARCHAR, UNIQUE), \texttt{stripe\_session\_id} (VARCHAR), \texttt{statut\_paiement} (ENUM \texttt{payment\_status\_enum}).
+\end{itemize}
+\end{servicecard}
+
+% -----------------------------------------------------------------------------
+\subsection{Billing Service (Facturation)}
+\textbf{Responsabilité :} Émission des factures légales immuables, calcul détaillé des taxes (TVA), compilation déportée des documents PDF et mise à disposition pour téléchargement.
+
+\vspace{0.2cm}
+\begin{servicecard}{Billing Service -- Spécification Technique}
+\textbf{Points d'Entrée (APIs REST \& Événements) :}
+\begin{itemize}[noitemsep]
+    \item \texttt{GET /api/v1/invoices/order/\{orderId\}} : Téléchargement du fichier PDF de la facture.
+    \item \texttt{GET /api/v1/invoices/my-invoices} : Historique des factures de l'acheteur connecté.
+    \item \textbf{Événement consommé :} \texttt{OrderPaidEvent} émis de façon asynchrone par Payment Service.
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Table \texttt{invoices}} : \texttt{id} (UUID, PK), \texttt{invoice\_number} (VARCHAR, UNIQUE, ex: \texttt{INV-2026-00451}), \texttt{order\_id} (UUID, UNIQUE, FK $\rightarrow$ \texttt{orders}), \texttt{user\_id} (UUID, FK $\rightarrow$ \texttt{users}), \texttt{montant\_ht} (NUMERIC(10,2)), \texttt{taux\_tva} (NUMERIC(4,2)), \texttt{montant\_tva} (NUMERIC(10,2)), \texttt{montant\_ttc} (NUMERIC(10,2)), \texttt{devise} (ENUM \texttt{currency\_enum}), \texttt{pdf\_url} (VARCHAR), \texttt{emise\_at} (TIMESTAMP).
+\end{itemize}
+\end{servicecard}
+
+% -----------------------------------------------------------------------------
+\subsection{Notification Service}
+\textbf{Responsabilité :} Routage des alertes in-app et expédition de courriels transactionnels vers les clients (validation d'achat, facture émise, expédition) et commerçants (rupture de stock).
+
+\vspace{0.2cm}
+\begin{servicecard}{Notification Service -- Spécification Technique}
+\textbf{Points d'Entrée (APIs REST \& Événements) :}
+\begin{itemize}[noitemsep]
+    \item \texttt{GET /api/v1/notifications/my-notifications} : Flux de notifications de l'utilisateur.
+    \item \texttt{PATCH /api/v1/notifications/\{id\}/read} : Acquittement d'une notification.
+    \item \textbf{Événements consommés :} \texttt{OrderStatusChangedEvent}, \texttt{StockAlertEvent}, \texttt{InvoiceGeneratedEvent}.
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Table \texttt{notifications}} : \texttt{id} (UUID, PK), \texttt{user\_id} (UUID, FK $\rightarrow$ \texttt{users}), \texttt{titre} (VARCHAR), \texttt{message} (TEXT), \texttt{type} (ENUM: \texttt{'COMMANDE\_STATUT'}, \texttt{'STOCK\_BAS'}, \texttt{'PROMOTION'}, \texttt{'SYSTEME'}), \texttt{est\_lu} (BOOLEAN), \texttt{created\_at} (TIMESTAMP).
+\end{itemize}
+\end{servicecard}
+
+% -----------------------------------------------------------------------------
+\subsection{Review Service}
+\textbf{Responsabilité :} Collecte des évaluations et commentaires clients après livraison du mobilier, modération éditoriale et publication des réponses du commerçant.
+
+\vspace{0.2cm}
+\begin{servicecard}{Review Service -- Spécification Technique}
+\textbf{Points d'Entrée (APIs REST) :}
+\begin{itemize}[noitemsep]
+    \item \texttt{GET /api/v1/reviews/product/\{productId\}} : Liste des avis validés d'un article.
+    \item \texttt{POST /api/v1/reviews} : Dépôt d'un avis client (note sur 5, titre, commentaire).
+    \item \texttt{POST /api/v1/reviews/\{id\}/reply} : Enregistrement d'une réponse officielle du commerçant.
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Table \texttt{reviews}} : \texttt{id} (UUID, PK), \texttt{user\_id} (UUID, FK $\rightarrow$ \texttt{users}), \texttt{product\_id} (UUID, FK $\rightarrow$ \texttt{products}), \texttt{titre} (VARCHAR(150)), \texttt{description} (TEXT), \texttt{note} (INT, CHECK 1 à 5), \texttt{reponse\_commercant} (TEXT), \texttt{repondu\_at} (TIMESTAMP), contrainte d'unicité \texttt{(user\_id, product\_id)}.
+\end{itemize}
+\end{servicecard}
+
+% -----------------------------------------------------------------------------
+\subsection{Supplier Service}
+\textbf{Responsabilité :} Annuaire des fabricants partenaires, passation et suivi des commandes de réapprovisionnement (\textit{Supply Orders}), et validation des réceptions de stocks.
+
+\vspace{0.2cm}
+\begin{servicecard}{Supplier Service -- Spécification Technique}
+\textbf{Points d'Entrée (APIs REST \& Événements) :}
+\begin{itemize}[noitemsep]
+    \item \texttt{GET /api/v1/suppliers} : Consultation du répertoire des fabricants.
+    \item \texttt{POST /api/v1/supply-orders} : Création d'une commande d'achat fournisseur.
+    \item \texttt{PATCH /api/v1/supply-orders/\{id\}/receive} : Réception de marchandises (émet l'événement \texttt{SupplyReceivedEvent}).
+    \item \textbf{Événement consommé :} \texttt{StockAlertEvent} (suggestion automatique de commande d'achat).
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Table \texttt{fournisseurs}} : \texttt{id} (UUID, PK), \texttt{nom} (VARCHAR), \texttt{email} (VARCHAR), \texttt{telephone} (VARCHAR), \texttt{adresse} (TEXT).
+    \item \textbf{Table \texttt{supply\_orders}} : \texttt{id} (UUID, PK), \texttt{fournisseur\_id} (UUID, FK $\rightarrow$ \texttt{fournisseurs}), \texttt{statut} (ENUM: \texttt{'BROUILLON'}, \texttt{'EMISE'}, \texttt{'CONFIRMEE'}, \texttt{'EXPEDIEE'}, \texttt{'RECEPTIONNEE'}, \texttt{'ANNULEE'}), \texttt{montant\_total} (NUMERIC(10,2)), \texttt{date\_emission} (TIMESTAMP), \texttt{date\_reception} (TIMESTAMP).
+    \item \textbf{Table \texttt{supply\_order\_items}} : \texttt{id} (UUID, PK), \texttt{supply\_order\_id} (UUID, FK $\rightarrow$ \texttt{supply\_orders}), \texttt{product\_id} (UUID, FK $\rightarrow$ \texttt{products}), \texttt{quantite} (INT), \texttt{prix\_unitaire} (NUMERIC(10,2)).
+\end{itemize}
+\end{servicecard}
+
+% -----------------------------------------------------------------------------
+\subsection{Analytics \& IA Batches (Spark)}
+\textbf{Responsabilité :} Calcul en différé des métriques business (chiffre d'affaires global et par article, produit star, taux de rupture) et calcul des recommandations par filtrage collaboratif.
+
+\vspace{0.2cm}
+\begin{servicecard}{Analytics \& IA Batches -- Spécification Technique}
+\textbf{Exécution \& Points d'Exposition :}
+\begin{itemize}[noitemsep]
+    \item Traitements batch Spark autonomes exécutés périodiquement (scheduler quotidien).
+    \item Endpoints REST d'exposition vers le Backoffice (via API Gateway) :
+    \begin{itemize}[noitemsep]
+        \item \texttt{GET /api/v1/kpi/global} : Chiffre d'affaires consolidé, produit star, taux de rupture.
+        \item \texttt{GET /api/v1/kpi/daily} : Historique quotidien des ventes et du panier moyen.
+        \item \texttt{GET /api/v1/recommendations/\{productId\}} : Suggestions de produits similaires.
+    \end{itemize}
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Modèle de Données Associé (Tables Pré-calculées) :}
+\begin{itemize}[noitemsep]
+    \item \textbf{Table \texttt{kpi\_daily}} : \texttt{date} (DATE, PK), \texttt{ca\_total} (NUMERIC(12,2)), \texttt{nb\_commandes} (INT), \texttt{panier\_moyen} (NUMERIC(10,2)).
+    \item \textbf{Table \texttt{kpi\_product}} : \texttt{product\_id} (UUID, PK), \texttt{nom\_produit} (VARCHAR), \texttt{quantite\_vendue} (INT), \texttt{ca\_produit} (NUMERIC(12,2)), \texttt{note\_moyenne} (NUMERIC(3,2)), \texttt{stock\_restant} (INT), \texttt{en\_rupture} (BOOLEAN).
+    \item \textbf{Table \texttt{kpi\_global}} : \texttt{id} (INT, PK), \texttt{ca\_global} (NUMERIC(14,2)), \texttt{nb\_commandes\_total} (INT), \texttt{produit\_star\_id} (UUID, FK), \texttt{taux\_rupture} (NUMERIC(5,2)).
+    \item \textbf{Table \texttt{product\_recommendations}} : \texttt{product\_id} (UUID), \texttt{recommended\_product\_id} (UUID), \texttt{score} (NUMERIC(5,4)), PK composée \texttt{(product\_id, recommended\_product\_id)}.
+\end{itemize}
+\end{servicecard}
+
+\newpage
+
+% =============================================================================
+% SECTION 4 : SYNTHÈSE ET CONCLUSION
+% =============================================================================
+\section{Synthèse et Alignement avec le Projet}
+
+L'architecture microservices retenue pour Golden House garantit un alignement parfait entre les exigences pédagogiques et les meilleures pratiques de l'industrie :
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Alignement avec le cahier des charges et la base existante :}
+    L'ensemble des modèles présentés dans ce rapport correspond rigoureusement au script SQL DDL opérationnel du projet (\texttt{backend/database/01-schema.sql}) et au jeu d'essai (\texttt{02-seed.sql}). Les types énumérés PostgreSQL, les contraintes d'intégrité et la gestion Stripe sont strictement respectés.
+    
+    \item \textbf{Simplicité et robustesse du découpage :}
+    En limitant les appels synchrones au strict chemin critique de l'achat (vérification du stock et initialisation bancaire), nous évitons les effets d'amplification de latence et les pannes en cascade. L'ensemble des opérations annexes (notifications, facturation, statistiques) est déporté en asynchrone.
+    
+    \item \textbf{Intégration d'outils modernes (MCP) :}
+    L'exposition d'une passerelle MCP dédiée permet aux agents conversationnels d'interroger directement les microservices pour guider l'acheteur sur mobile ou assister le gestionnaire sur le backoffice web sans complexifier les APIs transactionnelles.
+\end{enumerate}
+
+\vspace{1.2cm}
+\begin{center}
+\rule{0.35\linewidth}{0.6pt}\\[0.3cm]
+\small\color{darkgray}
+Livrable d'Architecture Logicielle -- Projet Golden House -- Polytech Montpellier IG5 / DaMS
+\end{center}
+
+\end{document}

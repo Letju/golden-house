@@ -184,16 +184,6 @@
 
 \vspace{-4pt}
 
-% =============================================================================
-% SECTION 2 : RÈGLE DE DÉCISION (Page 1)
-% =============================================================================
-\section{Synchrone et Asynchrone}
-
-\begin{itemize}[leftmargin=*, nosep]
-    \item \textbf{\textcolor{syncblue}{Synchrone (REST / HTTP)}} : Requêtes bloquantes exigeant une réponse immédiate pour finaliser l'action courante (lecture catalogue, calcul panier, validation adresse, réservation stock, session Stripe).
-    \item \textbf{\textcolor{asyncorange}{Asynchrone (Events / Webhooks)}} : Traitements découplés dans le temps et tolérants aux pannes sans bloquer l'acheteur (webhook Stripe, confirmation paiement, génération facture PDF, notifications email/push, réassort fournisseur, recalcul note).
-\end{itemize}
-
 \newpage
 
 % =============================================================================

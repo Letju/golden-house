@@ -246,8 +246,6 @@
 % =============================================================================
 \section{Modèle relationnel des données (PostgreSQL)}
 
-\textit{Choix de modélisation : la facturation et les retours sont des tables dédiées plutôt que des colonnes de \texttt{orders}. La facture est un document légal immuable (numérotation continue, snapshot HT/TVA/TTC et adresse figés) en relation 1-1 avec la commande ; ses lignes se déduisent de \texttt{order\_items} (pas de table \texttt{invoice\_items} au format MVP). Un retour approuvé génère un avoir plutôt qu'une modification. Les retours sont mono-ligne au format MVP (un retour = une ligne de commande ; multi-produits = plusieurs demandes) avec traçabilité du remboursement Stripe et restock. Le schéma est découpé en deux figures par périmètre (tables grisées = rappels externes) ; en-têtes et flèches suivent la couleur du domaine (achats, utilisateurs, catalogue, interactions).}
-
 \begin{center}
 \includegraphics[width=\textwidth,height=0.80\textheight,keepaspectratio]{figures/mcd_achats.pdf}
 \\[2pt]

@@ -25,6 +25,7 @@ Le système s'articule autour de trois briques principales :
 - **Frontend Mobile** : React Native
 - **Frontend Backoffice** : React
 - **Backend** : Spring Boot (Architecture Micro-services, Spring Data JPA, Spring Security)
+- **Authentification** : Keycloak (IdP OIDC / SSO prévu pour l'authentification des micro-services)
 - **Base de données** : PostgreSQL
 - **IA & Agents** : Model Context Protocol (MCP)
 - **Paiement** : Stripe (PaymentIntent & Checkout)

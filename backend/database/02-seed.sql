@@ -203,19 +203,7 @@ INSERT INTO invoices (id, order_id, numero_facture, statut, montant_ht, montant_
 )
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO invoice_items (id, invoice_id, order_item_id, nom_produit, quantite, prix_unitaire_ht, taux_tva, total_ht, total_ttc) VALUES
-(
-    '11000001-0000-0000-0000-000000000001',
-    '10000001-0000-0000-0000-000000000001',
-    'f0000001-0000-0000-0000-000000000001',
-    'Canapé d''Angle Velours Céleste',
-    1,
-    1082.50,
-    20.00,
-    1082.50,
-    1299.00
-)
-ON CONFLICT (id) DO NOTHING;
+-- Note MVP : pas de invoice_items, les lignes se deduisent de order_items.
 
 -- -----------------------------------------------------------------------------
 -- 9. COMMANDE LIVREE + RETOUR PRODUIT (CASSE LIVRAISON, EN ATTENTE D'INSTRUCTION)
@@ -268,40 +256,18 @@ INSERT INTO invoices (id, order_id, numero_facture, statut, montant_ht, montant_
 )
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO invoice_items (id, invoice_id, order_item_id, nom_produit, quantite, prix_unitaire_ht, taux_tva, total_ht, total_ttc) VALUES
-(
-    '11000002-0000-0000-0000-000000000002',
-    '10000002-0000-0000-0000-000000000002',
-    'f0000002-0000-0000-0000-000000000002',
-    'Canapé Convertible Express Oslo',
-    1,
-    749.17,
-    20.00,
-    749.17,
-    899.00
-)
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO product_returns (id, order_id, user_id, statut, motif, description, devise, restock_effectue) VALUES
+INSERT INTO product_returns (id, order_id, user_id, order_item_id, product_id, quantite, statut, motif, description, devise, remis_en_stock) VALUES
 (
     'b0000001-0000-0000-0000-000000000001',
     'd0000002-0000-0000-0000-000000000002',
     'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    'f0000002-0000-0000-0000-000000000002',
+    'c0000003-0000-0000-0000-000000000003',
+    1,
     'DEMANDEE',
     'CASSE_LIVRAISON',
     'Pied arrière droit fissuré constaté à la livraison, photos transmises au service client.',
     'EUR',
-    FALSE
-)
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO return_items (id, return_id, order_item_id, product_id, quantite, remis_en_stock) VALUES
-(
-    'b1000001-0000-0000-0000-000000000001',
-    'b0000001-0000-0000-0000-000000000001',
-    'f0000002-0000-0000-0000-000000000002',
-    'c0000003-0000-0000-0000-000000000003',
-    1,
     FALSE
 )
 ON CONFLICT (id) DO NOTHING;

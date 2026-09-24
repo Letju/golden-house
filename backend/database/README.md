@@ -49,14 +49,10 @@ erDiagram
     ADDRESSES ||--o{ ORDERS : "adresse de facturation"
 
     ORDERS ||--o| INVOICES : "facturée par"
-    INVOICES ||--o{ INVOICE_ITEMS : "détaille"
-    ORDER_ITEMS ||--o{ INVOICE_ITEMS : "figé dans"
+    ORDER_ITEMS ||--o{ INVOICES : "lignes déduites"
 
     ORDERS ||--o{ PRODUCT_RETURNS : "fait l'objet de"
     USERS ||--o{ PRODUCT_RETURNS : "demande"
-    PRODUCT_RETURNS ||--o{ RETURN_ITEMS : "concerne"
-    ORDER_ITEMS ||--o{ RETURN_ITEMS : "retourné via"
-    PRODUCTS ||--o{ RETURN_ITEMS : "restocké via"
 
     PRODUCTS ||--o{ REVIEWS : "évalué par"
     FOURNISSEURS ||--o{ PRODUCTS : "fournit"
@@ -161,37 +157,19 @@ erDiagram
         timestamp date_emission
     }
 
-    INVOICE_ITEMS {
-        uuid id PK
-        uuid invoice_id FK
-        uuid order_item_id FK "Ligne d'origine"
-        varchar nom_produit "Snapshot immuable"
-        int quantite
-        numeric prix_unitaire_ht
-        numeric taux_tva "TVA par ligne"
-        numeric total_ht
-        numeric total_ttc
-    }
-
     PRODUCT_RETURNS {
         uuid id PK
         uuid order_id FK
         uuid user_id FK
+        uuid order_item_id FK "Ligne retournée (mono-ligne MVP)"
+        uuid product_id FK
+        int quantite
         return_status_enum statut "DEMANDEE, APPROUVEE, RECEPTIONNEE, REMBOURSEE, etc."
         return_reason_enum motif "DEFECTUEUX, CASSE_LIVRAISON, CHANGEMENT_AVIS, etc."
         text description
         numeric montant_rembourse
         varchar stripe_refund_id UK "Stripe re_xxx"
-        boolean restock_effectue
-    }
-
-    RETURN_ITEMS {
-        uuid id PK
-        uuid return_id FK
-        uuid order_item_id FK
-        uuid product_id FK
-        int quantite "Retour partiel possible"
-        boolean remis_en_stock "Restock ligne à ligne"
+        boolean remis_en_stock
     }
 
     REVIEWS {
@@ -252,6 +230,6 @@ erDiagram
   - Utilisateurs de test : un commerçant administrateur et un client avec identifiant Stripe.
   - Adresses de facturation et de livraison.
   - Commande test avec statut paiement Stripe `SUCCEEDED` et lignes de commande.
-  - Factures légales `FACT-2026-0001/0002` (snapshot HT/TVA/TTC, PDF S3) et lignes de facture.
-  - Commande livrée avec demande de retour `CASSE_LIVRAISON` et notification `RETOUR_STATUT`.
+  - Factures légales `FACT-2026-0001/0002` (snapshot HT/TVA/TTC, PDF S3, lignes déduites de `order_items`).
+  - Commande avec demande de retour mono-ligne `CASSE_LIVRAISON` et notification `RETOUR_STATUT`.
   - Avis client et réponse publique du commerçant.

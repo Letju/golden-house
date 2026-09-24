@@ -246,7 +246,7 @@
 % =============================================================================
 \section{Modèle relationnel des données (PostgreSQL)}
 
-\textit{Choix de modélisation : la facturation et les retours sont des tables dédiées plutôt que des colonnes de \texttt{orders}. La facture est un document légal immuable (numérotation continue, snapshot HT/TVA/TTC et adresse figés) en relation 1-1 avec la commande ; un retour approuvé génère un avoir plutôt qu'une modification. Les retours gèrent le partiel (lignes concernées, quantités) avec traçabilité du remboursement Stripe et restock ligne à ligne.}
+\textit{Choix de modélisation : la facturation et les retours sont des tables dédiées plutôt que des colonnes de \texttt{orders}. La facture est un document légal immuable (numérotation continue, snapshot HT/TVA/TTC et adresse figés) en relation 1-1 avec la commande ; ses lignes se déduisent de \texttt{order\_items} (pas de table \texttt{invoice\_items} au format MVP). Un retour approuvé génère un avoir plutôt qu'une modification. Les retours sont mono-ligne au format MVP (un retour = une ligne de commande ; multi-produits = plusieurs demandes) avec traçabilité du remboursement Stripe et restock.}
 
 \begin{center}
 \begin{tikzpicture}[
@@ -440,46 +440,22 @@
 \end{tabular}
 };
 
-% ==================== 14. INVOICE_ITEMS (Sous Invoices) ====================
-\node[tbl] (invoice_items) at (23.0, 8.0) {
-\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
-\rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small invoice\_items}} \\
-\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
-\textbf{invoice\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
-\textbf{order\_item\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
-\textbf{nom\_produit} & VARCHAR & \\
-\textbf{quantite} & INT & \\
-\textbf{prix\_unit\_ht} & NUMERIC & \\
-\textbf{total\_ht / total\_ttc} & NUMERIC & \\
-\end{tabular}
-};
-
-% ==================== 15. RETURNS (Bas Gauche) ====================
+% ==================== 14. RETURNS (Bas Gauche, mono-ligne MVP) ====================
 \node[tbl] (returns) at (2.0, 4.8) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small product\_returns}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
 \textbf{order\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
 \textbf{user\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
-\textbf{statut} & return\_status\_enum & \\
-\textbf{motif} & return\_reason\_enum & \\
-\textbf{montant\_rembourse} & NUMERIC & \\
-\textbf{stripe\_refund\_id} & VARCHAR & \textcolor{ukcolor}{\textbf{UK}} \\
-\textbf{restock\_effectue} & BOOL & \\
-\textbf{decide\_le} & TIMESTAMPTZ & \\
-\end{tabular}
-};
-
-% ==================== 16. RETURN_ITEMS (Sous Returns) ====================
-\node[tbl] (return_items) at (2.0, -0.6) {
-\begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
-\rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small return\_items}} \\
-\textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
-\textbf{return\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
 \textbf{order\_item\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
 \textbf{product\_id} & UUID & \textcolor{fkcolor}{\textbf{FK}} \\
+\textbf{statut} & return\_status\_enum & \\
+\textbf{motif} & return\_reason\_enum & \\
 \textbf{quantite} & INT & \\
+\textbf{montant\_rembourse} & NUMERIC & \\
+\textbf{stripe\_refund\_id} & VARCHAR & \textcolor{ukcolor}{\textbf{UK}} \\
 \textbf{remis\_en\_stock} & BOOL & \\
+\textbf{decide\_le} & TIMESTAMPTZ & \\
 \end{tabular}
 };
 
@@ -533,26 +509,17 @@
 % invoices -> orders (contournement par la droite puis le haut)
 \draw[fkarrow] ([yshift=30pt]invoices.west) -- node[lbl, above, pos=0.15] {order\_id} (18.5, 15.2) -- (18.5, 20.5) -- ([yshift=-32pt]orders.east);
 
-% invoice_items -> invoices
-\draw[fkarrow] (invoice_items.north) -- node[lbl, left] {invoice\_id} (invoices.south);
-
-% invoice_items -> order_items (couloir vertical x=9.8)
-\draw[fkarrow] ([yshift=12pt]invoice_items.west) -- (9.8, 8.9) -- node[lbl, left] {order\_item\_id} (9.8, 12.5) -- (order_items.east);
-
 % returns -> orders (couloir vertical gauche x=-1.0)
 \draw[fkarrow] ([yshift=25pt]returns.west) -- (-1.0, 5.7) -- (-1.0, 20.8) -- node[lbl, above] {order\_id} ([yshift=-30pt]orders.west);
 
 % returns -> users (couloir x=-1.7 puis traversée haute vers users.south)
 \draw[fkarrow] ([yshift=-25pt]returns.west) -- (-1.7, 3.9) -- (-1.7, 18.8) -- node[lbl, above, pos=0.5] {user\_id} (22.2, 18.8) -- (users.south);
 
-% return_items -> returns
-\draw[fkarrow] (return_items.north) -- node[lbl, left] {return\_id} (returns.south);
+% returns -> order_items (ligne retournee, couloir vertical x=10.4)
+\draw[fkarrow] (returns.east) -- (10.4, 4.8) -- node[lbl, right] {order\_item\_id} (10.4, 12.0) -- ([yshift=-14pt]order_items.east);
 
-% return_items -> order_items (horizontal au-dessus de supply puis couloir x=10.4)
-\draw[fkarrow] ([yshift=22pt]return_items.east) -- (10.4, 0.6) -- node[lbl, right] {order\_item\_id} (10.4, 12.0) -- ([yshift=-14pt]order_items.east);
-
-% return_items -> products (passage bas sous supply_orders)
-\draw[fkarrow] (return_items.south) -- (2.0, -2.6) -- node[lbl, below, pos=0.55] {product\_id} (11.8, -2.6) -- ([yshift=-50pt]products.west);
+% returns -> products (produit restocke)
+\draw[fkarrow] ([yshift=-40pt]returns.east) -- node[lbl, below] {product\_id} ([yshift=-50pt]products.west);
 
 \end{tikzpicture}
 \end{center}
@@ -664,7 +631,7 @@
 \textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/orders/\{id\}} & Consultation du détail et statut d'une commande \\
 \textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/orders/user/\{userId\}} & Historique complet des commandes d'un client \\
 \textcolor{secondary}{\texttt{\textbf{PUT}}}  & \texttt{/api/orders/\{id\}/status} & Mise à jour du statut d'acheminement (Backoffice) \\
-\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/orders/\{id\}/returns} & Demande de retour client (motif + lignes concernées) \\
+\textcolor{postgreen}{\texttt{\textbf{POST}}} & \texttt{/api/orders/\{id\}/returns} & Demande de retour client (motif + ligne concernée) \\
 \textcolor{syncblue}{\texttt{\textbf{GET}}}  & \texttt{/api/orders/\{id\}/returns} & Suivi des demandes de retour d'une commande \\
 \textcolor{secondary}{\texttt{\textbf{PUT}}}  & \texttt{/api/returns/\{id\}/statut} & Instruction backoffice (approuver, réceptionner, rembourser) \\
 \bottomrule[0.8pt]
@@ -703,7 +670,7 @@
 \vspace{3pt}
 
 \subsection{Billing Service (Facturation \& Avoirs)}
-\textit{Émission asynchrone des factures légales (sur \texttt{OrderPaidEvent}), calcul TVA et archivage PDF (S3/MinIO). Persistance : tables \texttt{invoices} (document immuable 1-1 avec la commande) et \texttt{invoice\_items} (lignes pour TVA et avoirs partiels).}
+\textit{Émission asynchrone des factures légales (sur \texttt{OrderPaidEvent}), calcul TVA et archivage PDF (S3/MinIO). Persistance : table \texttt{invoices} (document immuable 1-1 avec la commande, lignes déduites de \texttt{order\_items} au format MVP).}
 
 \begin{center}
 \renewcommand{\arraystretch}{1.08}

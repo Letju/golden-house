@@ -192,7 +192,7 @@ model Product {
   orderItems       OrderItem[]
   reviews          Review[]
   supplyOrderItems SupplyOrderItem[]
-  returnItems      ReturnItem[]
+  returns          ProductReturn[]
 
   @@index([categorie])
   @@index([prix])
@@ -277,8 +277,7 @@ model OrderItem {
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
-  invoiceItems InvoiceItem[]
-  returnItems  ReturnItem[]
+  returns ProductReturn[]
 
   @@map("order_items")
 }
@@ -304,77 +303,44 @@ model Invoice {
   createdAt             DateTime      @default(now()) @map("created_at")
   updatedAt             DateTime      @updatedAt @map("updated_at")
 
-  order Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
-  items InvoiceItem[]
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
 
   @@index([statut])
   @@map("invoices")
 }
 
-model InvoiceItem {
-  id             String   @id @default(uuid())
-  invoiceId      String   @map("invoice_id")
-  orderItemId    String?  @map("order_item_id")
-  nomProduit     String   @map("nom_produit")
-  quantite       Int
-  prixUnitaireHt Decimal  @map("prix_unitaire_ht") @db.Decimal(10, 2)
-  tauxTva        Decimal  @default(20.00) @map("taux_tva") @db.Decimal(5, 2)
-  totalHt        Decimal  @map("total_ht") @db.Decimal(10, 2)
-  totalTtc       Decimal  @map("total_ttc") @db.Decimal(10, 2)
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  invoice   Invoice    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
-
-  @@index([invoiceId])
-  @@map("invoice_items")
-}
-
 // -----------------------------------------------------------------------------
-// RETOURS PRODUITS (DEMANDES CLIENT, REMBOURSEMENT STRIPE, RESTOCK)
+// RETOURS PRODUITS MONO-LIGNE (FORMAT MVP : 1 RETOUR = 1 LIGNE DE COMMANDE)
 // -----------------------------------------------------------------------------
 
 model ProductReturn {
   id               String       @id @default(uuid())
   orderId          String       @map("order_id")
   userId           String       @map("user_id")
+  orderItemId      String       @map("order_item_id")
+  productId        String       @map("product_id")
+  quantite         Int          @default(1)
   statut           ReturnStatus @default(DEMANDEE)
   motif            ReturnReason
   description      String?
   montantRembourse Decimal?     @map("montant_rembourse") @db.Decimal(10, 2)
   devise           Currency     @default(EUR)
   stripeRefundId   String?      @unique @map("stripe_refund_id") // remboursement Stripe (re_xxx)
-  restockEffectue  Boolean      @default(false) @map("restock_effectue")
+  remisEnStock     Boolean      @default(false) @map("remis_en_stock")
   decidePar        String?      @map("decide_par")
   decideLe         DateTime?    @map("decide_le")
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
 
-  order Order        @relation(fields: [orderId], references: [id], onDelete: Restrict)
-  user  User         @relation(fields: [userId], references: [id], onDelete: Restrict)
-  items ReturnItem[]
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
 
   @@index([orderId])
   @@index([userId])
   @@index([statut])
   @@map("product_returns")
-}
-
-model ReturnItem {
-  id           String   @id @default(uuid())
-  returnId     String   @map("return_id")
-  orderItemId  String   @map("order_item_id")
-  productId    String   @map("product_id")
-  quantite     Int
-  remisEnStock Boolean  @default(false) @map("remis_en_stock")
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  productReturn ProductReturn @relation(fields: [returnId], references: [id], onDelete: Cascade)
-  orderItem     OrderItem     @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
-  product       Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
-
-  @@index([returnId])
-  @@map("return_items")
 }
 
 // -----------------------------------------------------------------------------

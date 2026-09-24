@@ -248,38 +248,31 @@ CREATE TABLE invoices (
 CREATE INDEX idx_invoices_order_id ON invoices(order_id);
 CREATE INDEX idx_invoices_statut ON invoices(statut);
 
-CREATE TABLE invoice_items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    invoice_id UUID NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
-    order_item_id UUID REFERENCES order_items(id) ON DELETE SET NULL, -- tracabilite ligne d'origine
-    nom_produit VARCHAR(255) NOT NULL, -- snapshot immuable
-    quantite INT NOT NULL CHECK (quantite > 0),
-    prix_unitaire_ht NUMERIC(10, 2) NOT NULL CHECK (prix_unitaire_ht >= 0),
-    taux_tva NUMERIC(5, 2) NOT NULL DEFAULT 20.00 CHECK (taux_tva >= 0),
-    total_ht NUMERIC(10, 2) NOT NULL CHECK (total_ht >= 0),
-    total_ttc NUMERIC(10, 2) NOT NULL CHECK (total_ttc >= 0),
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_invoice_items_invoice_id ON invoice_items(invoice_id);
+-- Note MVP : pas de table invoice_items. La facture est en 1-1 avec la
+-- commande, ses lignes se deduisent de order_items par jointure order_id.
+-- (A reintroduire si avoirs partiels complexes : TVA par ligne figee.)
 
 -- -----------------------------------------------------------------------------
--- RETOURS PRODUITS (DEMANDES CLIENT, REMBOURSEMENT STRIPE, RESTOCK)
--- Un retour porte sur tout ou partie des lignes d'une commande livree.
--- Workflow : DEMANDEE -> APPROUVEE/REFUSEE -> RECEPTIONNEE -> REMBOURSEE/AVOIR_EMIS -> CLOTUREE
+-- RETOURS PRODUITS MONO-LIGNE (DEMANDE CLIENT, REMBOURSEMENT STRIPE, RESTOCK)
+-- Format MVP : un retour = une ligne de commande (produit + quantite).
+-- Un retour multi-produits = plusieurs demandes. Workflow :
+-- DEMANDEE -> APPROUVEE/REFUSEE -> RECEPTIONNEE -> REMBOURSEE/AVOIR_EMIS -> CLOTUREE
 -- -----------------------------------------------------------------------------
 
 CREATE TABLE product_returns (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     order_id UUID NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    order_item_id UUID NOT NULL REFERENCES order_items(id) ON DELETE RESTRICT,
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
+    quantite INT NOT NULL DEFAULT 1 CHECK (quantite > 0),
     statut return_status_enum NOT NULL DEFAULT 'DEMANDEE',
     motif return_reason_enum NOT NULL,
     description TEXT,
     montant_rembourse NUMERIC(10, 2) CHECK (montant_rembourse >= 0),
     devise currency_enum NOT NULL DEFAULT 'EUR',
     stripe_refund_id VARCHAR(255) UNIQUE, -- remboursement Stripe (re_xxx)
-    restock_effectue BOOLEAN NOT NULL DEFAULT FALSE,
+    remis_en_stock BOOLEAN NOT NULL DEFAULT FALSE, -- restock (exclu si defectueux)
     decide_par VARCHAR(255), -- gestionnaire ayant statue sur la demande
     decide_le TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -289,18 +282,6 @@ CREATE TABLE product_returns (
 CREATE INDEX idx_returns_order_id ON product_returns(order_id);
 CREATE INDEX idx_returns_user_id ON product_returns(user_id);
 CREATE INDEX idx_returns_statut ON product_returns(statut);
-
-CREATE TABLE return_items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    return_id UUID NOT NULL REFERENCES product_returns(id) ON DELETE CASCADE,
-    order_item_id UUID NOT NULL REFERENCES order_items(id) ON DELETE RESTRICT,
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
-    quantite INT NOT NULL CHECK (quantite > 0),
-    remis_en_stock BOOLEAN NOT NULL DEFAULT FALSE, -- restock ligne a ligne (exclu si defectueux)
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_return_items_return_id ON return_items(return_id);
 
 -- -----------------------------------------------------------------------------
 -- AVIS CLIENTS & MODERATION

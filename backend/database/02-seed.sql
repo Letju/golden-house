@@ -180,3 +180,139 @@ INSERT INTO notifications (id, user_id, titre, message, type, est_lu) VALUES
     FALSE
 )
 ON CONFLICT (id) DO NOTHING;
+
+-- -----------------------------------------------------------------------------
+-- 8. FACTURES LEGALES (SNAPSHOT IMMUABLE HT/TVA/TTC, TVA 20 %)
+-- CMD-2026-0001 : 1299.00 TTC = 1082.50 HT + 216.50 TVA
+-- -----------------------------------------------------------------------------
+INSERT INTO invoices (id, order_id, numero_facture, statut, montant_ht, montant_tva, montant_ttc, devise, snapshot_adresse_facturation, pdf_url, stripe_payment_intent_id, date_emission, date_echeance) VALUES
+(
+    '10000001-0000-0000-0000-000000000001',
+    'd0000001-0000-0000-0000-000000000001',
+    'FACT-2026-0001',
+    'PAYEE',
+    1082.50,
+    216.50,
+    1299.00,
+    'EUR',
+    'Justin Chapon, 10 Boulevard du Jeu de Paume, Appartement 4B, 34000 Montpellier, France',
+    's3://golden-house/invoices/FACT-2026-0001.pdf',
+    'pi_test_3N9xJkLkd82LsmQ81JkaopLq',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP + INTERVAL '30 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO invoice_items (id, invoice_id, order_item_id, nom_produit, quantite, prix_unitaire_ht, taux_tva, total_ht, total_ttc) VALUES
+(
+    '11000001-0000-0000-0000-000000000001',
+    '10000001-0000-0000-0000-000000000001',
+    'f0000001-0000-0000-0000-000000000001',
+    'Canapé d''Angle Velours Céleste',
+    1,
+    1082.50,
+    20.00,
+    1082.50,
+    1299.00
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- -----------------------------------------------------------------------------
+-- 9. COMMANDE LIVREE + RETOUR PRODUIT (CASSE LIVRAISON, EN ATTENTE D'INSTRUCTION)
+-- CMD-2026-0002 : 899.00 TTC = 749.17 HT + 149.83 TVA
+-- -----------------------------------------------------------------------------
+INSERT INTO orders (id, order_number, user_id, statut, statut_paiement, stripe_payment_intent_id, stripe_session_id, shipping_address_id, billing_address_id, montant_total, devise, code_promo_applique) VALUES
+(
+    'd0000002-0000-0000-0000-000000000002',
+    'CMD-2026-0002',
+    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    'RETOUR_EN_COURS',
+    'SUCCEEDED',
+    'pi_test_7Q2mRtVbn45PswE12MnbvcXz',
+    'cs_test_g7h8i9j0k1l2',
+    'a0000001-0000-0000-0000-000000000001',
+    'a0000002-0000-0000-0000-000000000002',
+    899.00,
+    'EUR',
+    NULL
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO order_items (id, order_id, product_id, nom_produit, quantite, prix_unitaire, total_ligne) VALUES
+(
+    'f0000002-0000-0000-0000-000000000002',
+    'd0000002-0000-0000-0000-000000000002',
+    'c0000003-0000-0000-0000-000000000003',
+    'Canapé Convertible Express Oslo',
+    1,
+    899.00,
+    899.00
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO invoices (id, order_id, numero_facture, statut, montant_ht, montant_tva, montant_ttc, devise, snapshot_adresse_facturation, pdf_url, stripe_payment_intent_id, date_emission, date_echeance) VALUES
+(
+    '10000002-0000-0000-0000-000000000002',
+    'd0000002-0000-0000-0000-000000000002',
+    'FACT-2026-0002',
+    'PAYEE',
+    749.17,
+    149.83,
+    899.00,
+    'EUR',
+    'Justin Chapon, 10 Boulevard du Jeu de Paume, Appartement 4B, 34000 Montpellier, France',
+    's3://golden-house/invoices/FACT-2026-0002.pdf',
+    'pi_test_7Q2mRtVbn45PswE12MnbvcXz',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP + INTERVAL '30 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO invoice_items (id, invoice_id, order_item_id, nom_produit, quantite, prix_unitaire_ht, taux_tva, total_ht, total_ttc) VALUES
+(
+    '11000002-0000-0000-0000-000000000002',
+    '10000002-0000-0000-0000-000000000002',
+    'f0000002-0000-0000-0000-000000000002',
+    'Canapé Convertible Express Oslo',
+    1,
+    749.17,
+    20.00,
+    749.17,
+    899.00
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO product_returns (id, order_id, user_id, statut, motif, description, devise, restock_effectue) VALUES
+(
+    'b0000001-0000-0000-0000-000000000001',
+    'd0000002-0000-0000-0000-000000000002',
+    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    'DEMANDEE',
+    'CASSE_LIVRAISON',
+    'Pied arrière droit fissuré constaté à la livraison, photos transmises au service client.',
+    'EUR',
+    FALSE
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO return_items (id, return_id, order_item_id, product_id, quantite, remis_en_stock) VALUES
+(
+    'b1000001-0000-0000-0000-000000000001',
+    'b0000001-0000-0000-0000-000000000001',
+    'f0000002-0000-0000-0000-000000000002',
+    'c0000003-0000-0000-0000-000000000003',
+    1,
+    FALSE
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO notifications (id, user_id, titre, message, type, est_lu) VALUES
+(
+    'f1000002-0000-0000-0000-000000000002',
+    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    'Demande de retour enregistrée',
+    'Votre demande de retour pour la commande CMD-2026-0002 est en cours d examen par notre équipe.',
+    'RETOUR_STATUT',
+    FALSE
+)
+ON CONFLICT (id) DO NOTHING;

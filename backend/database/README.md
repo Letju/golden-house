@@ -48,6 +48,16 @@ erDiagram
     ADDRESSES ||--o{ ORDERS : "adresse de livraison"
     ADDRESSES ||--o{ ORDERS : "adresse de facturation"
 
+    ORDERS ||--o| INVOICES : "facturée par"
+    INVOICES ||--o{ INVOICE_ITEMS : "détaille"
+    ORDER_ITEMS ||--o{ INVOICE_ITEMS : "figé dans"
+
+    ORDERS ||--o{ PRODUCT_RETURNS : "fait l'objet de"
+    USERS ||--o{ PRODUCT_RETURNS : "demande"
+    PRODUCT_RETURNS ||--o{ RETURN_ITEMS : "concerne"
+    ORDER_ITEMS ||--o{ RETURN_ITEMS : "retourné via"
+    PRODUCTS ||--o{ RETURN_ITEMS : "restocké via"
+
     PRODUCTS ||--o{ REVIEWS : "évalué par"
     FOURNISSEURS ||--o{ PRODUCTS : "fournit"
 
@@ -117,8 +127,8 @@ erDiagram
         uuid id PK
         varchar order_number UK
         uuid user_id FK
-        order_status_enum statut "EN_ATTENTE_PAIEMENT, PAYEE, EN_PREPARATION, etc."
-        payment_status_enum statut_paiement "PENDING, SUCCEEDED, FAILED, etc."
+        order_status_enum statut "EN_ATTENTE_PAIEMENT, PAYEE, RETOUR_EN_COURS, REMBOURSEE, etc."
+        payment_status_enum statut_paiement "PENDING, SUCCEEDED, FAILED, REFUNDED, etc."
         varchar stripe_payment_intent_id UK "Stripe pi_xxx"
         varchar stripe_session_id "Stripe cs_xxx"
         uuid shipping_address_id FK
@@ -136,6 +146,52 @@ erDiagram
         int quantite
         numeric prix_unitaire "Snapshot du prix d'achat"
         numeric total_ligne
+    }
+
+    INVOICES {
+        uuid id PK
+        uuid order_id FK "UNIQUE 1-1"
+        varchar numero_facture UK "FACT-2026-0001"
+        invoice_status_enum statut "BROUILLON, EMISE, PAYEE, AVOIR_EMIS"
+        numeric montant_ht
+        numeric montant_tva
+        numeric montant_ttc
+        text snapshot_adresse_facturation "Snapshot immuable"
+        varchar pdf_url "PDF S3/MinIO"
+        timestamp date_emission
+    }
+
+    INVOICE_ITEMS {
+        uuid id PK
+        uuid invoice_id FK
+        uuid order_item_id FK "Ligne d'origine"
+        varchar nom_produit "Snapshot immuable"
+        int quantite
+        numeric prix_unitaire_ht
+        numeric taux_tva "TVA par ligne"
+        numeric total_ht
+        numeric total_ttc
+    }
+
+    PRODUCT_RETURNS {
+        uuid id PK
+        uuid order_id FK
+        uuid user_id FK
+        return_status_enum statut "DEMANDEE, APPROUVEE, RECEPTIONNEE, REMBOURSEE, etc."
+        return_reason_enum motif "DEFECTUEUX, CASSE_LIVRAISON, CHANGEMENT_AVIS, etc."
+        text description
+        numeric montant_rembourse
+        varchar stripe_refund_id UK "Stripe re_xxx"
+        boolean restock_effectue
+    }
+
+    RETURN_ITEMS {
+        uuid id PK
+        uuid return_id FK
+        uuid order_item_id FK
+        uuid product_id FK
+        int quantite "Retour partiel possible"
+        boolean remis_en_stock "Restock ligne à ligne"
     }
 
     REVIEWS {
@@ -196,4 +252,6 @@ erDiagram
   - Utilisateurs de test : un commerçant administrateur et un client avec identifiant Stripe.
   - Adresses de facturation et de livraison.
   - Commande test avec statut paiement Stripe `SUCCEEDED` et lignes de commande.
+  - Factures légales `FACT-2026-0001/0002` (snapshot HT/TVA/TTC, PDF S3) et lignes de facture.
+  - Commande livrée avec demande de retour `CASSE_LIVRAISON` et notification `RETOUR_STATUT`.
   - Avis client et réponse publique du commerçant.

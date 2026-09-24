@@ -34,6 +34,8 @@ CREATE TYPE order_status_enum AS ENUM (
     'EN_PREPARATION',
     'EXPEDIEE',
     'LIVREE',
+    'RETOUR_EN_COURS',
+    'REMBOURSEE',
     'ANNULEE'
 );
 CREATE TYPE payment_status_enum AS ENUM (
@@ -55,9 +57,35 @@ CREATE TYPE supply_order_status_enum AS ENUM (
 );
 CREATE TYPE notification_type_enum AS ENUM (
     'COMMANDE_STATUT',
+    'RETOUR_STATUT',
     'STOCK_BAS',
     'PROMOTION',
     'SYSTEME'
+);
+CREATE TYPE invoice_status_enum AS ENUM (
+    'BROUILLON',
+    'EMISE',
+    'PAYEE',
+    'AVOIR_EMIS',
+    'ANNULEE'
+);
+CREATE TYPE return_status_enum AS ENUM (
+    'DEMANDEE',
+    'APPROUVEE',
+    'REFUSEE',
+    'RECEPTIONNEE',
+    'REMBOURSEE',
+    'AVOIR_EMIS',
+    'CLOTUREE'
+);
+CREATE TYPE return_reason_enum AS ENUM (
+    'DEFECTUEUX',
+    'NON_CONFORME',
+    'CASSE_LIVRAISON',
+    'ERREUR_COULEUR',
+    'TAILLE_INADAPTEE',
+    'CHANGEMENT_AVIS',
+    'AUTRE'
 );
 
 -- -----------------------------------------------------------------------------
@@ -192,6 +220,87 @@ CREATE TABLE order_items (
     total_ligne NUMERIC(10, 2) NOT NULL CHECK (total_ligne >= 0),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- -----------------------------------------------------------------------------
+-- FACTURATION LEGALE (DOCUMENT IMMUABLE 1-1 AVEC LA COMMANDE)
+-- Une facture fige les montants HT/TVA/TTC et l'adresse au moment du paiement.
+-- On ne modifie jamais une facture EMISE : un retour approuve donne un avoir.
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE invoices (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    order_id UUID NOT NULL UNIQUE REFERENCES orders(id) ON DELETE RESTRICT,
+    numero_facture VARCHAR(50) NOT NULL UNIQUE, -- ex FACT-2026-0001 (sequence legale continue)
+    statut invoice_status_enum NOT NULL DEFAULT 'BROUILLON',
+    montant_ht NUMERIC(10, 2) NOT NULL CHECK (montant_ht >= 0),
+    montant_tva NUMERIC(10, 2) NOT NULL CHECK (montant_tva >= 0),
+    montant_ttc NUMERIC(10, 2) NOT NULL CHECK (montant_ttc >= 0),
+    devise currency_enum NOT NULL DEFAULT 'EUR',
+    snapshot_adresse_facturation TEXT NOT NULL, -- snapshot immuable (l'adresse peut evoluer)
+    pdf_url VARCHAR(500), -- objet S3/MinIO du PDF legal
+    stripe_payment_intent_id VARCHAR(255), -- PaymentIntent d'origine (pi_xxx)
+    date_emission TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_echeance TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_invoices_order_id ON invoices(order_id);
+CREATE INDEX idx_invoices_statut ON invoices(statut);
+
+CREATE TABLE invoice_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    invoice_id UUID NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+    order_item_id UUID REFERENCES order_items(id) ON DELETE SET NULL, -- tracabilite ligne d'origine
+    nom_produit VARCHAR(255) NOT NULL, -- snapshot immuable
+    quantite INT NOT NULL CHECK (quantite > 0),
+    prix_unitaire_ht NUMERIC(10, 2) NOT NULL CHECK (prix_unitaire_ht >= 0),
+    taux_tva NUMERIC(5, 2) NOT NULL DEFAULT 20.00 CHECK (taux_tva >= 0),
+    total_ht NUMERIC(10, 2) NOT NULL CHECK (total_ht >= 0),
+    total_ttc NUMERIC(10, 2) NOT NULL CHECK (total_ttc >= 0),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_invoice_items_invoice_id ON invoice_items(invoice_id);
+
+-- -----------------------------------------------------------------------------
+-- RETOURS PRODUITS (DEMANDES CLIENT, REMBOURSEMENT STRIPE, RESTOCK)
+-- Un retour porte sur tout ou partie des lignes d'une commande livree.
+-- Workflow : DEMANDEE -> APPROUVEE/REFUSEE -> RECEPTIONNEE -> REMBOURSEE/AVOIR_EMIS -> CLOTUREE
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE product_returns (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    statut return_status_enum NOT NULL DEFAULT 'DEMANDEE',
+    motif return_reason_enum NOT NULL,
+    description TEXT,
+    montant_rembourse NUMERIC(10, 2) CHECK (montant_rembourse >= 0),
+    devise currency_enum NOT NULL DEFAULT 'EUR',
+    stripe_refund_id VARCHAR(255) UNIQUE, -- remboursement Stripe (re_xxx)
+    restock_effectue BOOLEAN NOT NULL DEFAULT FALSE,
+    decide_par VARCHAR(255), -- gestionnaire ayant statue sur la demande
+    decide_le TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_returns_order_id ON product_returns(order_id);
+CREATE INDEX idx_returns_user_id ON product_returns(user_id);
+CREATE INDEX idx_returns_statut ON product_returns(statut);
+
+CREATE TABLE return_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    return_id UUID NOT NULL REFERENCES product_returns(id) ON DELETE CASCADE,
+    order_item_id UUID NOT NULL REFERENCES order_items(id) ON DELETE RESTRICT,
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
+    quantite INT NOT NULL CHECK (quantite > 0),
+    remis_en_stock BOOLEAN NOT NULL DEFAULT FALSE, -- restock ligne a ligne (exclu si defectueux)
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_return_items_return_id ON return_items(return_id);
 
 -- -----------------------------------------------------------------------------
 -- AVIS CLIENTS & MODERATION

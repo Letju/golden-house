@@ -50,6 +50,8 @@ enum OrderStatus {
   EN_PREPARATION
   EXPEDIEE
   LIVREE
+  RETOUR_EN_COURS
+  REMBOURSEE
   ANNULEE
 }
 
@@ -79,9 +81,38 @@ enum SupplyOrderStatus {
 
 enum NotificationType {
   COMMANDE_STATUT
+  RETOUR_STATUT
   STOCK_BAS
   PROMOTION
   SYSTEME
+}
+
+enum InvoiceStatus {
+  BROUILLON
+  EMISE
+  PAYEE
+  AVOIR_EMIS
+  ANNULEE
+}
+
+enum ReturnStatus {
+  DEMANDEE
+  APPROUVEE
+  REFUSEE
+  RECEPTIONNEE
+  REMBOURSEE
+  AVOIR_EMIS
+  CLOTUREE
+}
+
+enum ReturnReason {
+  DEFECTUEUX
+  NON_CONFORME
+  CASSE_LIVRAISON
+  ERREUR_COULEUR
+  TAILLE_INADAPTEE
+  CHANGEMENT_AVIS
+  AUTRE
 }
 
 // -----------------------------------------------------------------------------
@@ -89,45 +120,46 @@ enum NotificationType {
 // -----------------------------------------------------------------------------
 
 model User {
-  id               String    @id @default(uuid())
-  email            String    @unique
-  passwordHash     String    @map("password_hash")
-  username         String    @unique
-  firstName        String?   @map("first_name")
-  lastName         String?   @map("last_name")
+  id               String   @id @default(uuid())
+  email            String   @unique
+  passwordHash     String   @map("password_hash")
+  username         String   @unique
+  firstName        String?  @map("first_name")
+  lastName         String?  @map("last_name")
   phone            String?
-  role             Role      @default(CLIENT)
-  currency         Currency  @default(EUR)
-  stripeCustomerId String?   @unique @map("stripe_customer_id") // ID client Stripe (cus_xxx)
-  isActive         Boolean   @default(true) @map("is_active")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  role             Role     @default(CLIENT)
+  currency         Currency @default(EUR)
+  stripeCustomerId String?  @unique @map("stripe_customer_id") // ID client Stripe (cus_xxx)
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   addresses     Address[]
   cart          Cart?
   orders        Order[]
   reviews       Review[]
   notifications Notification[]
+  returns       ProductReturn[]
 
   @@map("users")
 }
 
 model Address {
-  id           String      @id @default(uuid())
-  userId       String      @map("user_id")
-  type         AddressType @default(LIVRAISON)
-  street       String
-  complement   String?
-  postalCode   String      @map("postal_code")
-  city         String
-  country      String      @default("France")
-  isDefault    Boolean     @default(false) @map("is_default")
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
+  id         String      @id @default(uuid())
+  userId     String      @map("user_id")
+  type       AddressType @default(LIVRAISON)
+  street     String
+  complement String?
+  postalCode String      @map("postal_code")
+  city       String
+  country    String      @default("France")
+  isDefault  Boolean     @default(false) @map("is_default")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
 
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  shippingOrders  Order[] @relation("ShippingAddress")
-  billingOrders   Order[] @relation("BillingAddress")
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingOrders Order[] @relation("ShippingAddress")
+  billingOrders  Order[] @relation("BillingAddress")
 
   @@map("addresses")
 }
@@ -155,11 +187,12 @@ model Product {
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
 
-  fournisseur      Fournisseur?        @relation(fields: [fournisseurId], references: [id], onDelete: SetNull)
+  fournisseur      Fournisseur?      @relation(fields: [fournisseurId], references: [id], onDelete: SetNull)
   cartItems        CartItem[]
   orderItems       OrderItem[]
   reviews          Review[]
   supplyOrderItems SupplyOrderItem[]
+  returnItems      ReturnItem[]
 
   @@index([categorie])
   @@index([prix])
@@ -172,11 +205,11 @@ model Product {
 // -----------------------------------------------------------------------------
 
 model Cart {
-  id        String     @id @default(uuid())
-  userId    String     @unique @map("user_id")
-  codePromo String?    @map("code_promo")
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  codePromo String?  @map("code_promo")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   items CartItem[]
@@ -210,7 +243,7 @@ model Order {
   statut                OrderStatus   @default(EN_ATTENTE_PAIEMENT)
   statutPaiement        PaymentStatus @default(PENDING) @map("statut_paiement")
   stripePaymentIntentId String?       @unique @map("stripe_payment_intent_id") // ID PaymentIntent Stripe (pi_xxx)
-  stripeSessionId       String?       @map("stripe_session_id")                // Checkout Session Stripe (cs_xxx)
+  stripeSessionId       String?       @map("stripe_session_id") // Checkout Session Stripe (cs_xxx)
   shippingAddressId     String        @map("shipping_address_id")
   billingAddressId      String        @map("billing_address_id")
   montantTotal          Decimal       @map("montant_total") @db.Decimal(10, 2)
@@ -219,10 +252,12 @@ model Order {
   createdAt             DateTime      @default(now()) @map("created_at")
   updatedAt             DateTime      @updatedAt @map("updated_at")
 
-  user            User        @relation(fields: [userId], references: [id], onDelete: Restrict)
-  shippingAddress Address     @relation("ShippingAddress", fields: [shippingAddressId], references: [id], onDelete: Restrict)
-  billingAddress  Address     @relation("BillingAddress", fields: [billingAddressId], references: [id], onDelete: Restrict)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  shippingAddress Address         @relation("ShippingAddress", fields: [shippingAddressId], references: [id], onDelete: Restrict)
+  billingAddress  Address         @relation("BillingAddress", fields: [billingAddressId], references: [id], onDelete: Restrict)
   items           OrderItem[]
+  invoice         Invoice?
+  returns         ProductReturn[]
 
   @@index([userId])
   @@index([statut])
@@ -242,7 +277,104 @@ model OrderItem {
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
+  invoiceItems InvoiceItem[]
+  returnItems  ReturnItem[]
+
   @@map("order_items")
+}
+
+// -----------------------------------------------------------------------------
+// FACTURATION LEGALE (DOCUMENT IMMUABLE 1-1 AVEC LA COMMANDE)
+// -----------------------------------------------------------------------------
+
+model Invoice {
+  id                    String        @id @default(uuid())
+  orderId               String        @unique @map("order_id")
+  numeroFacture         String        @unique @map("numero_facture") // ex FACT-2026-0001
+  statut                InvoiceStatus @default(BROUILLON)
+  montantHt             Decimal       @map("montant_ht") @db.Decimal(10, 2)
+  montantTva            Decimal       @map("montant_tva") @db.Decimal(10, 2)
+  montantTtc            Decimal       @map("montant_ttc") @db.Decimal(10, 2)
+  devise                Currency      @default(EUR)
+  snapshotAdresse       String        @map("snapshot_adresse_facturation") @db.Text
+  pdfUrl                String?       @map("pdf_url") // objet S3/MinIO du PDF legal
+  stripePaymentIntentId String?       @map("stripe_payment_intent_id")
+  dateEmission          DateTime      @default(now()) @map("date_emission")
+  dateEcheance          DateTime?     @map("date_echeance")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  order Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  items InvoiceItem[]
+
+  @@index([statut])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id             String   @id @default(uuid())
+  invoiceId      String   @map("invoice_id")
+  orderItemId    String?  @map("order_item_id")
+  nomProduit     String   @map("nom_produit")
+  quantite       Int
+  prixUnitaireHt Decimal  @map("prix_unitaire_ht") @db.Decimal(10, 2)
+  tauxTva        Decimal  @default(20.00) @map("taux_tva") @db.Decimal(5, 2)
+  totalHt        Decimal  @map("total_ht") @db.Decimal(10, 2)
+  totalTtc       Decimal  @map("total_ttc") @db.Decimal(10, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  invoice   Invoice    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+// -----------------------------------------------------------------------------
+// RETOURS PRODUITS (DEMANDES CLIENT, REMBOURSEMENT STRIPE, RESTOCK)
+// -----------------------------------------------------------------------------
+
+model ProductReturn {
+  id               String       @id @default(uuid())
+  orderId          String       @map("order_id")
+  userId           String       @map("user_id")
+  statut           ReturnStatus @default(DEMANDEE)
+  motif            ReturnReason
+  description      String?
+  montantRembourse Decimal?     @map("montant_rembourse") @db.Decimal(10, 2)
+  devise           Currency     @default(EUR)
+  stripeRefundId   String?      @unique @map("stripe_refund_id") // remboursement Stripe (re_xxx)
+  restockEffectue  Boolean      @default(false) @map("restock_effectue")
+  decidePar        String?      @map("decide_par")
+  decideLe         DateTime?    @map("decide_le")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  order Order        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  user  User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items ReturnItem[]
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([statut])
+  @@map("product_returns")
+}
+
+model ReturnItem {
+  id           String   @id @default(uuid())
+  returnId     String   @map("return_id")
+  orderItemId  String   @map("order_item_id")
+  productId    String   @map("product_id")
+  quantite     Int
+  remisEnStock Boolean  @default(false) @map("remis_en_stock")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  productReturn ProductReturn @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  orderItem     OrderItem     @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([returnId])
+  @@map("return_items")
 }
 
 // -----------------------------------------------------------------------------
@@ -255,7 +387,7 @@ model Review {
   productId         String    @map("product_id")
   titre             String
   description       String
-  note              Int       // Note entre 1 et 5
+  note              Int // Note entre 1 et 5
   reponseCommercant String?   @map("reponse_commercant")
   reponduAt         DateTime? @map("repondu_at")
   createdAt         DateTime  @default(now()) @map("created_at")

@@ -179,4 +179,5 @@ Intégration d'un serveur MCP connecté au backend afin d'exposer de manière st
 ## 7. Hébergement Git & CI/CD
 
 - **Dépôt cible** : migration du projet vers **GitLab** (remote à ajouter, workflow `main` stable / `dev` / branches `feature` inchangé, revues via Merge Requests).
-- **CI/CD** : pipeline à cadrer ensemble (périmètre discuté en équipe, voir README).
+- **CI (blocante avant merge)** : pipeline `.gitlab-ci.yml` à écrire — sur chaque MR, vérification anti-erreurs : DDL + seed appliqués sur un postgres éphémère (cohérence des contraintes et des données), `prisma validate`, compilation LaTeX du rapport, MCD régénéré identique au versionné. Merge impossible si la CI échoue (réglage « pipelines must succeed »).
+- **CD (automatique)** : sur merge vers `main`, construction des images Docker (base PostgreSQL + schéma/seed, puis images des micro-services Spring Boot) et déploiement automatique vers l'environnement cible.

@@ -56,7 +56,8 @@ docker compose up -d
 ## Dépôt GitLab & CI/CD
 
 - **Cible** : migration du projet vers **GitLab** (remote à ajouter ; workflow `main` / `dev` / `feature` et revues via Merge Requests inchangés).
-- **CI/CD** : périmètre du pipeline à cadrer ensemble (voir discussion d'équipe).
+- **CI (blocante avant merge)** : `.gitlab-ci.yml` à écrire — sur chaque MR, vérification anti-erreurs : DDL + seed appliqués sur postgres éphémère, `prisma validate`, compilation LaTeX du rapport, MCD régénéré identique au commité. Merge impossible si la CI échoue.
+- **CD (automatique)** : sur merge vers `main`, construction de l'image Docker (PostgreSQL + schéma/seed, puis images des micro-services) et déploiement automatique.
 
 ## Documents de référence
 

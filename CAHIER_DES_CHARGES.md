@@ -154,3 +154,29 @@ Intégration d'un serveur MCP connecté au backend afin d'exposer de manière st
 | **Protocole IA** | **MCP (Model Context Protocol)** | Standardisation des outils et des contextes pour connecter le backend à des modèles et agents LLM. |
 | **Maquettage** | **Figma** | Prototypage collaboratif des écrans mobile et du tableau de bord backoffice. |
 | **Gestion de version** | **GitHub** | Suivi du code source, gestion des branches et revues de code en binôme. |
+
+## 6. Gestion des erreurs
+
+### 6.1. APIs REST (micro-services Spring Boot)
+
+- **Format unique** : RFC 7807 (`Problem Details`) avec `code` métier et `correlationId` (`type`, `title`, `status`, `detail`, `instance`).
+- **Codes** : `400` validation, `404` ressource introuvable, `409` conflit (stock insuffisant, double soumission), `422` règle métier, `502`/`504` dépendance en panne (Stripe, Keycloak).
+- **Idempotence** : clé `Idempotency-Key` sur les opérations sensibles (création commande, paiement, remboursement) pour supporter les retries client sans doublon.
+- **Traçabilité** : `X-Correlation-ID` propagé par l'API Gateway de bout en bout, repris dans tous les logs (format JSON).
+
+### 6.2. Workers asynchrones (événements, webhooks, notifications, réassort)
+
+- **Retry** : backoff exponentiel sur échec transitoire, puis bascule en file d'attente des lettres mortes (DLQ) après N tentatives.
+- **Idempotence** : consommateurs idempotents par clé d'événement (pas de double envoi d'email, pas de double génération de facture).
+- **Alerte** : seuil de messages en DLQ → notification à l'équipe.
+
+### 6.3. Batchs Spark (KPIs, recommandations ALS)
+
+- **Réexécutabilité** : jobs idempotents partitionnés par date, checkpointing Spark activé.
+- **Quarantaine** : lignes en erreur isolées (compteur + échantillon rejeté), sans bloquer le batch sous le seuil d'échec.
+- **Atomicité** : écriture des résultats par partition (pas de demi-écriture), job `FAILED` + notification au-delà du seuil.
+
+## 7. Hébergement Git & CI/CD
+
+- **Dépôt cible** : migration du projet vers **GitLab** (remote à ajouter, workflow `main` stable / `dev` / branches `feature` inchangé, revues via Merge Requests).
+- **CI/CD** : pipeline à cadrer ensemble (périmètre discuté en équipe, voir README).

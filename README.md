@@ -47,6 +47,17 @@ docker compose up -d
 - **Interface Web Adminer** : [http://localhost:8080](http://localhost:8080)
 - **Visualisation du Schéma (ERD)** : Voir [`backend/database/README.md`](backend/database/README.md) pour le diagramme visuel complet des tables et relations.
 
+## Gestion des erreurs
+
+- **APIs** : format unique RFC 7807 (`Problem Details`) avec `code` métier et `correlationId` ; `400` validation, `404` introuvable, `409` conflit (stock, double soumission), `422` règle métier, `502`/`504` dépendance (Stripe, Keycloak). Clé `Idempotency-Key` sur commande, paiement et remboursement.
+- **Workers async** (événements, webhooks, notifications, réassort) : retry à backoff exponentiel puis file de lettres mortes (DLQ), consommateurs idempotents, alerte au-delà du seuil.
+- **Batchs Spark** (KPIs, reco ALS) : jobs idempotents partitionnés par date avec checkpointing, lignes en erreur mises en quarantaine, écriture atomique par partition, `X-Correlation-ID` propagé partout (logs JSON).
+
+## Dépôt GitLab & CI/CD
+
+- **Cible** : migration du projet vers **GitLab** (remote à ajouter ; workflow `main` / `dev` / `feature` et revues via Merge Requests inchangés).
+- **CI/CD** : périmètre du pipeline à cadrer ensemble (voir discussion d'équipe).
+
 ## Documents de référence
 
 - `CONSIGNES.md` : Sujet et exigences transmises par Christophe Nauroy.

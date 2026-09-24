@@ -246,7 +246,7 @@
 % =============================================================================
 \section{Modèle relationnel des données (PostgreSQL)}
 
-\textit{Choix de modélisation : la facturation et les retours sont des tables dédiées plutôt que des colonnes de \texttt{orders}. La facture est un document légal immuable (numérotation continue, snapshot HT/TVA/TTC et adresse figés) en relation 1-1 avec la commande ; ses lignes se déduisent de \texttt{order\_items} (pas de table \texttt{invoice\_items} au format MVP). Un retour approuvé génère un avoir plutôt qu'une modification. Les retours sont mono-ligne au format MVP (un retour = une ligne de commande ; multi-produits = plusieurs demandes) avec traçabilité du remboursement Stripe et restock. Les aplats de fond et les flèches reprennent la couleur du domaine (achats, utilisateurs, catalogue, interactions) : chaque flèche est teintée par le domaine de sa table source.}
+\textit{Choix de modélisation : la facturation et les retours sont des tables dédiées plutôt que des colonnes de \texttt{orders}. La facture est un document légal immuable (numérotation continue, snapshot HT/TVA/TTC et adresse figés) en relation 1-1 avec la commande ; ses lignes se déduisent de \texttt{order\_items} (pas de table \texttt{invoice\_items} au format MVP). Un retour approuvé génère un avoir plutôt qu'une modification. Les retours sont mono-ligne au format MVP (un retour = une ligne de commande ; multi-produits = plusieurs demandes) avec traçabilité du remboursement Stripe et restock. Les en-têtes et les flèches reprennent la couleur du domaine (achats, utilisateurs, catalogue, interactions) : chaque flèche est teintée par le domaine de sa table source.}
 
 \begin{center}
 \begin{tikzpicture}[
@@ -527,14 +527,6 @@
 
 % reviews -> products (horizontal direct)
 \draw[fknotif] (reviews.west) -- node[lbl, above] {product\_id} (products.east);
-
-% ==================== APLATS DE DOMAINE (fond) ====================
-\begin{scope}[on background layer]
-\node[fill=orderpurple!8, rounded corners=4pt, inner sep=7pt, fit=(orders) (order_items) (invoices) (returns) (carts) (cart_items)] (boxachats) {};
-\node[fill=userblue!8, rounded corners=4pt, inner sep=7pt, fit=(users) (addresses)] (boxusers) {};
-\node[fill=cataloggreen!8, rounded corners=4pt, inner sep=7pt, fit=(products) (fournisseurs) (supply_orders) (supply_order_items)] (boxcat) {};
-\node[fill=notifteal!8, rounded corners=4pt, inner sep=7pt, fit=(reviews) (notifications)] (boxinter) {};
-\end{scope}
 
 % ==================== LÉGENDE COULEURS ====================
 \node[font=\scriptsize\sffamily, align=center] at (13, -6.4) {

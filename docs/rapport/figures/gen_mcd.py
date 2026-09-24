@@ -132,24 +132,15 @@ def main():
             for tbl, col, dtype, udt in cols:
                 if tbl != t or col in EXCLUDE_COLS:
                     continue
-                flag = ""
-                if col in pks.get(t, set()):
-                    flag = '<FONT COLOR="#BE1428"><B>PK</B></FONT>'
-                elif col in fk_cols.get(t, set()):
-                    label = "FK-UQ" if col in uks.get(t, set()) else "FK"
-                    flag = f'<FONT COLOR="#1E5FB9"><B>{label}</B></FONT>'
-                elif col in uks.get(t, set()):
-                    flag = '<FONT COLOR="#B46E14"><B>UK</B></FONT>'
                 rows.append(
                     f'<TR><TD ALIGN="LEFT"><B>{col}</B></TD>'
                     f'<TD ALIGN="LEFT"><FONT COLOR="#555555">'
-                    f'{short_type(dtype, udt)}</FONT></TD>'
-                    f'<TD>{flag}</TD></TR>')
+                    f'{short_type(dtype, udt)}</FONT></TD></TR>')
             body = "".join(rows)
             lines.append(
                 f'  {t} [label=<<TABLE BORDER="1" CELLBORDER="0" '
                 f'CELLSPACING="0" CELLPADDING="3">'
-                f'<TR><TD BGCOLOR="{color}" COLSPAN="3">'
+                f'<TR><TD BGCOLOR="{color}" COLSPAN="2">'
                 f'<FONT COLOR="white"><B>{t}</B></FONT></TD></TR>'
                 f'{body}</TABLE>>];')
         lines.append("")

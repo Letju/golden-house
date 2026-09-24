@@ -246,18 +246,21 @@
 % =============================================================================
 \section{Modèle relationnel des données (PostgreSQL)}
 
-\textit{Choix de modélisation : la facturation et les retours sont des tables dédiées plutôt que des colonnes de \texttt{orders}. La facture est un document légal immuable (numérotation continue, snapshot HT/TVA/TTC et adresse figés) en relation 1-1 avec la commande ; ses lignes se déduisent de \texttt{order\_items} (pas de table \texttt{invoice\_items} au format MVP). Un retour approuvé génère un avoir plutôt qu'une modification. Les retours sont mono-ligne au format MVP (un retour = une ligne de commande ; multi-produits = plusieurs demandes) avec traçabilité du remboursement Stripe et restock.}
+\textit{Choix de modélisation : la facturation et les retours sont des tables dédiées plutôt que des colonnes de \texttt{orders}. La facture est un document légal immuable (numérotation continue, snapshot HT/TVA/TTC et adresse figés) en relation 1-1 avec la commande ; ses lignes se déduisent de \texttt{order\_items} (pas de table \texttt{invoice\_items} au format MVP). Un retour approuvé génère un avoir plutôt qu'une modification. Les retours sont mono-ligne au format MVP (un retour = une ligne de commande ; multi-produits = plusieurs demandes) avec traçabilité du remboursement Stripe et restock. Les aplats de fond et les flèches reprennent la couleur du domaine (achats, utilisateurs, catalogue, interactions) : chaque flèche est teintée par le domaine de sa table source.}
 
 \begin{center}
 \begin{tikzpicture}[
     scale=0.62, every node/.style={transform shape},
     tbl/.style={draw=black!70, rounded corners=2pt, inner xsep=4pt, inner ysep=1pt, fill=white},
-    fkarrow/.style={->, >=Stealth, thick, color=gray!60!black},
+    fkuser/.style={->, >=Stealth, thick, color=userblue!80!black},
+    fkorder/.style={->, >=Stealth, thick, color=orderpurple!70!black},
+    fkcat/.style={->, >=Stealth, thick, color=cataloggreen!70!black},
+    fknotif/.style={->, >=Stealth, thick, color=notifteal!80!black},
     lbl/.style={font=\tiny\sffamily\bfseries, fill=white, inner sep=1.2pt, text=gray!50!black, rounded corners=1pt}
 ]
 
-% ==================== 1. USERS (Haut Droite) ====================
-\node[tbl] (users) at (22.2, 21.0) {
+% ==================== 1. USERS (Colonne Utilisateurs, haut) ====================
+\node[tbl] (users) at (22.5, 21.5) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{userblue}\multicolumn{3}{c}{\textbf{\color{white}\small users}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -289,8 +292,8 @@
 \end{tabular}
 };
 
-% ==================== 3. ORDERS (Haut Gauche) ====================
-\node[tbl] (orders) at (2.5, 22.0) {
+% ==================== 3. ORDERS (Colonne Achats, haut) ====================
+\node[tbl] (orders) at (4, 22) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small orders}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -306,8 +309,8 @@
 \end{tabular}
 };
 
-% ==================== 4. CARTS (Sous Addresses) ====================
-\node[tbl] (carts) at (14.5, 17.2) {
+% ==================== 4. CARTS (Colonne Achats, haut-centre) ====================
+\node[tbl] (carts) at (14.5, 19) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small carts}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -316,8 +319,8 @@
 \end{tabular}
 };
 
-% ==================== 5. CART_ITEMS (Gauche de Carts) ====================
-\node[tbl] (cart_items) at (6.5, 16.5) {
+% ==================== 5. CART_ITEMS (entre Orders et Carts) ====================
+\node[tbl] (cart_items) at (8.7, 17.5) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small cart\_items}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -327,8 +330,8 @@
 \end{tabular}
 };
 
-% ==================== 6. ORDER_ITEMS (Sous Orders) ====================
-\node[tbl] (order_items) at (2.5, 12.5) {
+% ==================== 6. ORDER_ITEMS (Colonne Achats, centre) ====================
+\node[tbl] (order_items) at (4, 15) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small order\_items}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -341,8 +344,8 @@
 \end{tabular}
 };
 
-% ==================== 7. NOTIFICATIONS (Sous Carts) ====================
-\node[tbl] (notifications) at (14.5, 12.0) {
+% ==================== 7. NOTIFICATIONS (Colonne Interactions, haut) ====================
+\node[tbl] (notifications) at (22.5, 15) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{notifteal}\multicolumn{3}{c}{\textbf{\color{white}\small notifications}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -353,8 +356,8 @@
 \end{tabular}
 };
 
-% ==================== 8. REVIEWS (Sous Cart_items) ====================
-\node[tbl] (reviews) at (7.2, 6.8) {
+% ==================== 8. REVIEWS (Colonne Interactions, bas) ====================
+\node[tbl] (reviews) at (21.5, 11) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{notifteal}\multicolumn{3}{c}{\textbf{\color{white}\small reviews}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -366,8 +369,8 @@
 \end{tabular}
 };
 
-% ==================== 9. PRODUCTS (Centre) ====================
-\node[tbl] (products) at (14.5, 4.0) {
+% ==================== 9. PRODUCTS (Hub central) ====================
+\node[tbl] (products) at (14.5, 11.5) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{cataloggreen}\multicolumn{3}{c}{\textbf{\color{white}\small products}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -385,8 +388,8 @@
 \end{tabular}
 };
 
-% ==================== 10. FOURNISSEURS (Bas Droite) ====================
-\node[tbl] (fournisseurs) at (22.2, -0.5) {
+% ==================== 10. FOURNISSEURS (Colonne Catalogue, bas) ====================
+\node[tbl] (fournisseurs) at (22.5, 5.5) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{cataloggreen}\multicolumn{3}{c}{\textbf{\color{white}\small fournisseurs}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -397,8 +400,8 @@
 \end{tabular}
 };
 
-% ==================== 11. SUPPLY_ORDERS (Bas Centre) ====================
-\node[tbl] (supply_orders) at (14.5, -4.5) {
+% ==================== 11. SUPPLY_ORDERS (Colonne Catalogue, bas-centre) ====================
+\node[tbl] (supply_orders) at (18.5, 1.5) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{cataloggreen}\multicolumn{3}{c}{\textbf{\color{white}\small supply\_orders}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -410,8 +413,8 @@
 \end{tabular}
 };
 
-% ==================== 12. SUPPLY_ORDER_ITEMS (Bas Centre-Gauche) ====================
-\node[tbl] (supply_order_items) at (8.8, -4.5) {
+% ==================== 12. SUPPLY_ORDER_ITEMS (au-dessus de Supply_orders) ====================
+\node[tbl] (supply_order_items) at (17, 6.5) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{cataloggreen}\multicolumn{3}{c}{\textbf{\color{white}\small supply\_order\_items}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -422,8 +425,8 @@
 \end{tabular}
 };
 
-% ==================== 13. INVOICES (Colonne Droite) ====================
-\node[tbl] (invoices) at (23.0, 14.0) {
+% ==================== 13. INVOICES (Colonne Achats, bas-centre) ====================
+\node[tbl] (invoices) at (4, 7.5) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small invoices}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -440,8 +443,8 @@
 \end{tabular}
 };
 
-% ==================== 14. RETURNS (Bas Gauche, mono-ligne MVP) ====================
-\node[tbl] (returns) at (2.0, 4.8) {
+% ==================== 14. RETURNS (Colonne Achats, bas) ====================
+\node[tbl] (returns) at (4, -0.5) {
 \begin{tabular}{@{\hspace{6pt}}l l r@{\hspace{6pt}}}
 \rowcolor{orderpurple}\multicolumn{3}{c}{\textbf{\color{white}\small product\_returns}} \\
 \textbf{id} & UUID & \textcolor{pkcolor}{\textbf{PK}} \\
@@ -459,67 +462,88 @@
 \end{tabular}
 };
 
-% ==================== RELATIONS ====================
-% addresses -> users (horizontal direct de user_id vers users.id)
-\draw[fkarrow] ([yshift=18pt]addresses.east) -- node[lbl, above, pos=0.4] {user\_id} ([yshift=45pt]users.west);
+% ==================== RELATIONS (flèches teintées par domaine source) ====================
+% --- Domaine Utilisateurs ---
+% addresses -> users
+\draw[fkuser] ([yshift=-14pt]addresses.east) -- node[lbl, above] {user\_id} ([yshift=30pt]users.west);
 
-% orders -> users (horizontal sous addresses, au niveau de devise)
-\draw[fkarrow] ([yshift=-45pt]orders.east) -- node[lbl, above, pos=0.4] {user\_id} ([yshift=5pt]users.west);
+% --- Domaine Achats ---
+% orders -> users (ligne haute, au-dessus de carts)
+\draw[fkorder] ([yshift=-32pt]orders.east) -- node[lbl, above, pos=0.5] {user\_id} ([yshift=-18pt]users.west);
 
-% orders -> addresses (billing & shipping)
-\draw[fkarrow] ([yshift=8pt]orders.east) -- node[lbl, above, pos=0.45] {billing\_address\_id} ([yshift=8pt]addresses.west);
-\draw[fkarrow] ([yshift=-12pt]orders.east) -- node[lbl, below, pos=0.45] {shipping\_address\_id} ([yshift=-12pt]addresses.west);
+% orders -> addresses (facturation & livraison)
+\draw[fkorder] ([yshift=20pt]orders.east) -- node[lbl, above, pos=0.4] {billing\_address\_id} ([yshift=-8pt]addresses.west);
+\draw[fkorder] ([yshift=-5pt]orders.east) -- node[lbl, below, pos=0.4] {shipping\_address\_id} ([yshift=-36pt]addresses.west);
 
-% orders -> order_items
-\draw[fkarrow] (orders.south) -- node[lbl, left] {order\_id} (order_items.north);
+% orders -> order_items (vertical direct, même colonne)
+\draw[fkorder] (orders.south) -- node[lbl, left] {order\_id} (order_items.north);
+
+% order_items -> products (descente à droite puis entrée ouest)
+\draw[fkorder] ([xshift=40pt]order_items.south) -- (7.5, 13.2) -- (7.5, 12.0) -- node[lbl, above, pos=0.75] {product\_id} ([yshift=14pt]products.west);
 
 % carts -> users
-\draw[fkarrow] (carts.east) -- node[lbl, above] {user\_id} (users.west |- carts.east);
+\draw[fkorder] (carts.east) -- node[lbl, above] {user\_id} (users.west |- carts.east);
 
-% cart_items -> carts (ligne directe de cart_id)
-\draw[fkarrow] ([yshift=10pt]cart_items.east) -- node[lbl, above] {cart\_id} ([yshift=10pt]carts.west);
+% cart_items -> carts
+\draw[fkorder] ([yshift=8pt]cart_items.east) -- node[lbl, above] {cart\_id} ([yshift=-14pt]carts.west);
 
-% notifications -> users
-\draw[fkarrow] (notifications.east) -- node[lbl, above] {user\_id} (users.west |- notifications.east);
+% cart_items -> products (descente puis entrée ouest)
+\draw[fkorder] (cart_items.south) -- (8.7, 13.1) -- node[lbl, above, pos=0.5] {product\_id} ([yshift=28pt]products.west);
 
-% reviews -> users (ligne horizontale sous notifications, passe à users.south)
-\draw[fkarrow] ([yshift=15pt]reviews.east) -- (22.2, 7.5) node[lbl, pos=0.55, above] {user\_id} -- (users.south);
+% invoices -> orders (couloir vertical gauche x=-0.5)
+\draw[fkorder] ([yshift=14pt]invoices.west) -- (-0.5, 8.3) -- (-0.5, 20.5) -- node[lbl, above] {order\_id} ([yshift=-26pt]orders.west);
 
-% cart_items -> products (passe sous carts à x=11.0, descend et entre dans products.north)
-\draw[fkarrow] ([yshift=-10pt]cart_items.east) -- node[lbl, above, pos=0.4] {product\_id} (11.0, 15.3) -- (11.0, 7.8) -- ([xshift=-16pt]products.north |- 0, 7.8) -- ([xshift=-16pt]products.north);
+% returns -> orders (couloir vertical gauche x=0.3)
+\draw[fkorder] ([yshift=20pt]returns.west) -- (0.3, 0.6) -- (0.3, 19.0) -- node[lbl, above] {order\_id} ([yshift=-42pt]orders.west);
 
-% order_items -> products (parallèle)
-\draw[fkarrow] ([yshift=12pt]order_items.east) -- node[lbl, above, pos=0.25] {product\_id} (11.3, 13.0) -- (11.3, 7.8) -- ([xshift=-6pt]products.north |- 0, 7.8) -- ([xshift=-6pt]products.north);
+% returns -> users (passage bas puis remontée à droite)
+\draw[fkorder] (returns.south) -- (4.0, -4.4) -- (26.5, -4.4) -- node[lbl, right, pos=0.85] {user\_id} (26.5, 21.5) -- (users.east);
 
-% reviews -> products (horizontal direct de product_id)
-\draw[fkarrow] ([yshift=-6pt]reviews.east) -- node[lbl, above] {product\_id} ([yshift=38pt]products.west);
+% returns -> order_items (ligne retournée, couloir vertical x=10.4)
+\draw[fkorder] ([yshift=28pt]returns.east) -- (10.4, 1.1) -- node[lbl, right] {order\_item\_id} (10.4, 14.2) -- ([yshift=-14pt]order_items.east);
 
-% supply_order_items -> products (diagonale depuis le nord vers products.south)
-\draw[fkarrow] (supply_order_items.north) -- node[lbl, right, pos=0.6] {product\_id} ([xshift=-30pt]products.south);
+% returns -> products (produit restocké, diagonale)
+\draw[fkorder] ([yshift=-28pt]returns.east) -- node[lbl, below, pos=0.45] {product\_id} ([yshift=-50pt]products.west);
 
-% supply_order_items -> supply_orders (horizontal direct de supply_order_id vers supply_orders)
-\draw[fkarrow] (supply_order_items.east) -- node[lbl, above] {supply\_order\_id} ([yshift=10pt]supply_orders.west);
+% --- Domaine Catalogue ---
+% products -> fournisseurs (descente à gauche puis traversée basse)
+\draw[fkcat] ([xshift=-8pt]products.south) -- (14.05, 4.0) -- node[lbl, below, pos=0.5] {fournisseur\_id} (22.5, 4.0) -- (fournisseurs.south);
 
-% products -> fournisseurs (horizontal direct)
-\draw[fkarrow] ([yshift=-22pt]products.east) -- node[lbl, above, pos=0.4] {fournisseur\_id} ([yshift=15pt]fournisseurs.west);
+% supply_orders -> fournisseurs (diagonale courte)
+\draw[fkcat] (supply_orders.east) -- node[lbl, right] {fournisseur\_id} ([xshift=-14pt]fournisseurs.south);
 
-% supply_orders -> fournisseurs (horizontal direct)
-\draw[fkarrow] ([yshift=12pt]supply_orders.east) -- node[lbl, above, pos=0.4] {fournisseur\_id} ([yshift=-15pt]fournisseurs.west);
+% supply_order_items -> supply_orders (vertical direct)
+\draw[fkcat] (supply_order_items.south) -- node[lbl, left] {supply\_order\_id} (17.0, 3.1);
 
-% invoices -> orders (contournement par la droite puis le haut)
-\draw[fkarrow] ([yshift=30pt]invoices.west) -- node[lbl, above, pos=0.15] {order\_id} (18.5, 15.2) -- (18.5, 20.5) -- ([yshift=-32pt]orders.east);
+% supply_order_items -> products (vertical direct vers products.south)
+\draw[fkcat] (supply_order_items.north) -- node[lbl, right] {product\_id} (17.0, 8.5);
 
-% returns -> orders (couloir vertical gauche x=-1.0)
-\draw[fkarrow] ([yshift=25pt]returns.west) -- (-1.0, 5.7) -- (-1.0, 20.8) -- node[lbl, above] {order\_id} ([yshift=-30pt]orders.west);
+% --- Domaine Interactions ---
+% notifications -> users (vertical direct)
+\draw[fknotif] (notifications.north) -- node[lbl, left] {user\_id} (users.south);
 
-% returns -> users (couloir x=-1.7 puis traversée haute vers users.south)
-\draw[fkarrow] ([yshift=-25pt]returns.west) -- (-1.7, 3.9) -- (-1.7, 18.8) -- node[lbl, above, pos=0.5] {user\_id} (22.2, 18.8) -- (users.south);
+% reviews -> users (contournement par la droite)
+\draw[fknotif] (reviews.east) -- (25.8, 11.0) -- node[lbl, right, pos=0.55] {user\_id} (25.8, 21.5) -- (users.east);
 
-% returns -> order_items (ligne retournee, couloir vertical x=10.4)
-\draw[fkarrow] (returns.east) -- (10.4, 4.8) -- node[lbl, right] {order\_item\_id} (10.4, 12.0) -- ([yshift=-14pt]order_items.east);
+% reviews -> products (horizontal direct)
+\draw[fknotif] (reviews.west) -- node[lbl, above] {product\_id} (products.east);
 
-% returns -> products (produit restocke)
-\draw[fkarrow] ([yshift=-40pt]returns.east) -- node[lbl, below] {product\_id} ([yshift=-50pt]products.west);
+% ==================== APLATS DE DOMAINE (fond) ====================
+\begin{scope}[on background layer]
+\node[fill=orderpurple!8, rounded corners=4pt, inner sep=7pt, fit=(orders) (order_items) (invoices) (returns) (carts) (cart_items)] (boxachats) {};
+\node[fill=userblue!8, rounded corners=4pt, inner sep=7pt, fit=(users) (addresses)] (boxusers) {};
+\node[fill=cataloggreen!8, rounded corners=4pt, inner sep=7pt, fit=(products) (fournisseurs) (supply_orders) (supply_order_items)] (boxcat) {};
+\node[fill=notifteal!8, rounded corners=4pt, inner sep=7pt, fit=(reviews) (notifications)] (boxinter) {};
+\end{scope}
+
+% ==================== LÉGENDE COULEURS ====================
+\node[font=\scriptsize\sffamily, align=center] at (13, -6.4) {
+\textcolor{orderpurple}{\rule{7pt}{7pt}} Achats \quad
+\textcolor{userblue}{\rule{7pt}{7pt}} Utilisateurs \quad
+\textcolor{cataloggreen}{\rule{7pt}{7pt}} Catalogue \quad
+\textcolor{notifteal}{\rule{7pt}{7pt}} Interactions \qquad
+\textcolor{gray!60!black}{$\longrightarrow$} FK teintée par domaine source
+};
 
 \end{tikzpicture}
 \end{center}

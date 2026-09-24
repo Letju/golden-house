@@ -258,7 +258,7 @@
 \section{Points d'entrée des microservices (1/2)}
 
 \subsection{Gateways (API Gateway Spring Cloud \& MCP Gateway)}
-\textit{Point d'entrée unique de l'architecture. Terminaison TLS, routage inverse, validation JWT et interface LLM.}
+\textit{Point d'entrée unique de l'architecture. Terminaison TLS, routage inverse, validation JWT via Keycloak (IdP OIDC prévu) et interface LLM.}
 
 \begin{center}
 \renewcommand{\arraystretch}{1.08}
@@ -277,7 +277,7 @@
 \vspace{3pt}
 
 \subsection{User Service}
-\textit{Gestion des profils clients, adresses de livraison/facturation et authentification sécurisée.}
+\textit{Gestion des profils clients, adresses de livraison/facturation et authentification déléguée à Keycloak (OIDC, prévu).}
 
 \begin{center}
 \renewcommand{\arraystretch}{1.08}

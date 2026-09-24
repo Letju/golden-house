@@ -102,7 +102,6 @@ CREATE TABLE users (
     phone VARCHAR(30),
     role role_enum NOT NULL DEFAULT 'CLIENT',
     currency currency_enum NOT NULL DEFAULT 'EUR',
-    stripe_customer_id VARCHAR(255) UNIQUE, -- ID client Stripe (cus_xxx)
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP

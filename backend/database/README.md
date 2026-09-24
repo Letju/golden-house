@@ -71,7 +71,6 @@ erDiagram
         varchar phone
         role_enum role "CLIENT, COMMERCANT, ADMIN"
         currency_enum currency "EUR, USD"
-        varchar stripe_customer_id UK "Stripe cus_xxx"
         boolean is_active
         timestamp created_at
     }

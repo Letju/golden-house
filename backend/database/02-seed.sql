@@ -15,9 +15,9 @@ ON CONFLICT (id) DO NOTHING;
 -- 2. UTILISATEURS (Commerçant & Client)
 -- Mots de passe hashés (BCrypt pour Spring Security - ex: 'Password123!')
 -- -----------------------------------------------------------------------------
-INSERT INTO users (id, email, password_hash, username, first_name, last_name, phone, role, currency, stripe_customer_id, is_active) VALUES
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'admin@goldenhouse.fr', '$2a$12$e8Y6Bqj7e5zT7rE5D6h4Xu7.K7U6dGf0B9gZ4t6X7t4J8t0B9gZ4t', 'admin_golden', 'Sophie', 'Marchand', '+33 6 12 34 56 78', 'COMMERCANT', 'EUR', NULL, TRUE),
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'client@test.fr', '$2a$12$e8Y6Bqj7e5zT7rE5D6h4Xu7.K7U6dGf0B9gZ4t6X7t4J8t0B9gZ4t', 'justin_c', 'Justin', 'Chapon', '+33 6 98 76 54 32', 'CLIENT', 'EUR', 'cus_test_123456789', TRUE)
+INSERT INTO users (id, email, password_hash, username, first_name, last_name, phone, role, currency, is_active) VALUES
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'admin@goldenhouse.fr', '$2a$12$e8Y6Bqj7e5zT7rE5D6h4Xu7.K7U6dGf0B9gZ4t6X7t4J8t0B9gZ4t', 'admin_golden', 'Sophie', 'Marchand', '+33 6 12 34 56 78', 'COMMERCANT', 'EUR', TRUE),
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'client@test.fr', '$2a$12$e8Y6Bqj7e5zT7rE5D6h4Xu7.K7U6dGf0B9gZ4t6X7t4J8t0B9gZ4t', 'justin_c', 'Justin', 'Chapon', '+33 6 98 76 54 32', 'CLIENT', 'EUR', TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 -- -----------------------------------------------------------------------------
